@@ -69,6 +69,8 @@ class Sentence(object):
         self.paragraph = paragraph
         self.tokens = []
         
+        sentence_index = 0
+        
         for token in sentence.get("tokens", None):
             index = token.get("index", None)
             word = token.get("word", None)
@@ -111,16 +113,11 @@ class Sentence(object):
             event_candidate_args = [] 
             args = []
             
-            print "index:", index
-            
             for e in sentence.get("eventCandidates", None):
-                print e.get("begin", None), "-", e.get("end", None)-1
                 if index >= e.get("begin", None) and index < e.get("end", None):
-                    print "poslije, uspilo uc!!!!"
                     args = e.get("arguments", None)
                     for arg in args:
                         for arg_index in range(arg.get("begin", None), arg.get("end", None)):
-                            print "    ", arg.get("begin", None), arg.get("end", None)
                             arg_word = None
                             for token_t in sentence.get("tokens", None):
                                 index_t = token_t.get("index", None)
@@ -130,17 +127,12 @@ class Sentence(object):
                                     break
                             
                             event_candidate_args.append((arg_word, arg.get("gold", None)))
-            print ""
-            print event_candidate_args
-            print ""
-            print "======================================================="
-            print""
-                        
+                     
             self.tokens.append(Token(self, word, token.get("stem", None), index, 
                                      token.get("pos", None), token.get("begin", None), token.get("end", None), 
-                                     mentions, deps, event_candidate, event_candidate_args))
+                                     mentions, deps, event_candidate, event_candidate_args, sentence_index))
             
-            # zamijeniti deps indekse sa stvarnim rijecima za stv
+            sentence_index += 1
 
 
 class Token(object):
@@ -148,7 +140,7 @@ class Token(object):
     TODO: comment
     '''
     def __init__(self, sentence, token, stem, index, pos, char_pos_begin, char_pos_end,
-                 mentions, deps, event_candidate, event_candidate_args):
+                 mentions, deps, event_candidate, event_candidate_args, sentence_index):
         '''
         TODO: comment
         '''
@@ -163,6 +155,13 @@ class Token(object):
         self.deps = deps
         self.event_candidate = event_candidate
         self.event_candidate_args = event_candidate_args
+        
+        # Derived features
+        self.paragraph_text = self.sentence.paragraph.txt
+        self.sentence_index = sentence_index
+            
+        print ""
+        print ""
         '''
         print sentence
         print token
