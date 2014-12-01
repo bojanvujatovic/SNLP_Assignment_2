@@ -79,6 +79,30 @@ class Sentences(object):
                 
         return (A, B)
     
+    def get_word_dict(self):
+        ret = {}
+        counter = 0
+        
+        for sentence in self.sentences:
+            for token in sentence.tokens:
+                if ret.get(token.word, None) == None:
+                    ret[token.word] = counter
+                    counter += 1
+            
+        return ret
+    
+    def get_class_dict(self):
+        ret = {}
+        counter = 0
+        
+        for sentence in self.sentences:
+            for token in sentence.tokens:
+                if ret.get(token.event_candidate, None) == None:
+                    ret[token.event_candidate] = counter
+                    counter += 1
+            
+        return ret
+    
         
 class Sentence(object):
     '''

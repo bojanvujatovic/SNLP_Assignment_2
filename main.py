@@ -7,6 +7,7 @@ workflow.
 """
 
 from Classes.Sentences import *
+from Features.example_features import *
 
 def main():
     """Main function of the project.
@@ -18,14 +19,17 @@ def main():
     2. 
     3.
     """
-    all_train_sentences = Paragraphs("Dataset/Train_small/").all_sentences()
+    all_train_sentences = Paragraphs("Dataset/Train_single/").all_sentences()
     (train_sentences, hand_out_sentences) = all_train_sentences.split_randomly(0.8)
     
-    test_sentences = Paragraphs("Dataset/Test/").all_sentences()
+    #test_sentences = Paragraphs("Dataset/Test/").all_sentences()
     
-    print len(train_sentences.sentences)
-    print len(hand_out_sentences.sentences)
-    print len(test_sentences.sentences)
+    word_dict = train_sentences.get_word_dict()
+    class_dict = train_sentences.get_class_dict()
+    
+    print class_dict
+    
+    word_class_template_feature(train_sentences.sentences[1].tokens[1], "None", None, word_dict, class_dict)
 
 if __name__ == "__main__":
     main()
