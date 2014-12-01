@@ -86,6 +86,7 @@ class Sentences(object):
         for sentence in self.sentences:
             for token in sentence.tokens:
                 if ret.get(token.word, None) == None:
+
                     ret[token.word] = counter
                     counter += 1
             
@@ -97,10 +98,29 @@ class Sentences(object):
         
         for sentence in self.sentences:
             for token in sentence.tokens:
-                if ret.get(token.event_candidate, None) == None:
+                if ret.get(token.event_candidate, None) == None and token.event_candidate != None:
                     ret[token.event_candidate] = counter
                     counter += 1
-            
+        
+        return ret
+    
+        
+    def get_trigger_dict(self):
+        ret = {}
+        counter = 0
+        
+        for sentence in self.sentences:
+            for token in sentence.tokens:
+                if token.event_candidate != "None" and ret.get(token.event_candidate, None) == None:
+                    ret[token.word] = counter
+                    counter += 1
+                    
+                    if '-' in token.word:
+                        for word_t in token.word.split('-'):
+                            if ret.get(word_t, None) == None:
+                                ret[word_t] = counter
+                                counter += 1
+
         return ret
     
         
@@ -155,7 +175,8 @@ class Sentence(object):
             for e in sentence.get("eventCandidates", None):
                 if index >= e.get("begin", None) and index < e.get("end", None):
                     event_candidate = e.get("gold", None)
-                    
+                    break
+                  
             event_candidate_args = [] 
             args = []
             
@@ -177,7 +198,7 @@ class Sentence(object):
             self.tokens.append(Token(self, word, token.get("stem", None), index, 
                                      token.get("pos", None), token.get("begin", None), token.get("end", None), 
                                      mentions, deps, event_candidate, event_candidate_args, sentence_index))
-            
+
             sentence_index += 1
 
 

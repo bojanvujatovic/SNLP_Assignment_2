@@ -21,6 +21,6 @@ def word_class_template_feature(token, event_candidate, event_candidate_args, wo
 
     data = array([1])
     i = array([word_dict[token.word] * N_classes + class_dict[event_candidate]])
-    j = array([0])
+    j = array([0]) 
 
     return csc_matrix((data, (i, j)), shape=(N_words*N_classes, 1), dtype=int8)
