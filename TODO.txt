@@ -1,0 +1,8 @@
+git 
+sharelatex
+code
+multilayer
+- šerceštron PLA
+regularisation
+theano, GPU
+vidjeti koje features
