@@ -9,7 +9,7 @@ from Classes.Sentences import *
 
 def main():
     """Main function of the project.
-    
+    # QUESTO E IL MIO COMMENTO
     Defines the project structure calling the following functions:
     1. 
     2. 
