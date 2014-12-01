@@ -4,6 +4,8 @@
 from os   import walk
 from json import JSONDecoder
 
+import random
+
 class Paragraphs(object):
     '''
     TODO: comment
@@ -30,7 +32,13 @@ class Paragraphs(object):
                     
                     if json_paragraph.get("txt", None) != None and json_paragraph.get("sentences", None):
                         self.paragraphs.append(Paragraph(file_name, json_paragraph["txt"], json_paragraph["sentences"]))   
-                    
+        
+    def all_sentences(self):
+        ret = Sentences("", [])
+        for paragraph in self.paragraphs:
+            ret.sentences += paragraph.sentences.sentences
+            
+        return ret
         
 class Paragraph(object):
     '''
@@ -42,31 +50,45 @@ class Paragraph(object):
         '''
         self.name = name
         self.txt = txt
-        self.sentences = Sentences(self, sentences)
+        self.sentences = Sentences(txt, sentences)
 
 class Sentences(object):
     '''
     TODO: comment
     '''
-    def __init__(self, paragraph, sentences):
+    def __init__(self, paragraph_txt, sentences):
         '''
         TODO: comment
         '''
-        self.paragraph = paragraph
         self.sentences = []
         
         for sentence in sentences:
-            self.sentences.append(Sentence(paragraph, sentence))
+            self.sentences.append(Sentence(paragraph_txt, sentence))
+    
+    def split_randomly(self, split_percentage):
+        A = Sentences("", [])
+        B = Sentences("", [])
+        
+        
+        random.seed(23234)
+        for sentence in self.sentences:
+            if random.random() < split_percentage:
+                A.sentences.append(sentence)
+            else:
+                B.sentences.append(sentence)
+                
+        return (A, B)
+    
         
 class Sentence(object):
     '''
     TODO: comment
     '''
-    def __init__(self, paragraph, sentence):
+    def __init__(self, paragraph_txt, sentence):
         '''
         TODO: comment
         '''
-        self.paragraph = paragraph
+        self.paragraph_txt = paragraph_txt
         self.tokens = []
         
         sentence_index = 0
@@ -139,13 +161,13 @@ class Token(object):
     '''
     TODO: comment
     '''
-    def __init__(self, sentence, token, stem, index, pos, char_pos_begin, char_pos_end,
+    def __init__(self, sentence, word, stem, index, pos, char_pos_begin, char_pos_end,
                  mentions, deps, event_candidate, event_candidate_args, sentence_index):
         '''
         TODO: comment
         '''
-        self.sentence = sentence
-        self.token = token
+        self.tokens_in_sentence = sentence.tokens
+        self.word = word
         self.stem = stem
         self.index = index
         self.pos = pos
@@ -153,27 +175,35 @@ class Token(object):
         self.char_pos_end = char_pos_end
         self.mentions = mentions
         self.deps = deps
+        
+        # What we want to learn
         self.event_candidate = event_candidate
         self.event_candidate_args = event_candidate_args
         
         # Derived features
-        self.paragraph_text = self.sentence.paragraph.txt
+        self.paragraph_text = sentence.paragraph_txt
         self.sentence_index = sentence_index
-            
+        
+        '''   
         print ""
         print ""
-        '''
-        print sentence
-        print token
-        print stem
-        print index
-        print pos
-        print char_pos_begin
-        print char_pos_end
-        print mentions
-        print deps
-        print event_candidate
-        print event_candidate_args
-        print ""
-        print ""
-        '''
+        
+        
+        print self.tokens_in_sentence 
+        print self.word 
+        print self.stem 
+        print self.index
+        print self.pos
+        print self.char_pos_begin 
+        print self.char_pos_end 
+        print self.mentions
+        print self.deps 
+        
+        # What we want to learn
+        print self.event_candidate 
+        print self.event_candidate_args 
+        
+        # Derived features
+        print self.paragraph_text 
+        print self.sentence_index
+        ''' 

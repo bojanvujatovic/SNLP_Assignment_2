@@ -18,7 +18,14 @@ def main():
     2. 
     3.
     """
-    train_test = Paragraphs("Dataset/Train_single/")
+    all_train_sentences = Paragraphs("Dataset/Train_small/").all_sentences()
+    (train_sentences, hand_out_sentences) = all_train_sentences.split_randomly(0.8)
+    
+    test_sentences = Paragraphs("Dataset/Test/").all_sentences()
+    
+    print len(train_sentences.sentences)
+    print len(hand_out_sentences.sentences)
+    print len(test_sentences.sentences)
 
 if __name__ == "__main__":
     main()
