@@ -29,7 +29,9 @@ def main():
     
     print class_dict
     
-    word_class_template_feature(train_sentences.sentences[1].tokens[1], "None", None, word_dict, class_dict)
+#     word_class_template_feature(train_sentences.sentences[1].tokens[1], "None", None, word_dict, class_dict)
+    print train_sentences.sentences[1].tokens[0].word
+    number_in_token_feature(train_sentences.sentences[1].tokens[0])
 
 if __name__ == "__main__":
     main()
