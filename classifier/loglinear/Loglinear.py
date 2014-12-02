@@ -30,7 +30,7 @@ class LoglinearModel(ClassifierModel):
                 prediction = self.argmax(token, weights)
                 truth = self.gold(token)
                 if truth != prediction:
-                    weights += self.alpha * (self.phi(token, prediction) - self.phi(token, truth))
+                    weights = weights + self.alpha * (self.phi(token, prediction) - self.phi(token, truth))
                     changed = True
             if not changed:
                 break
