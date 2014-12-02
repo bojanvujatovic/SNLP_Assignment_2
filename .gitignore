@@ -25,6 +25,10 @@ var/
 # Training and test sets
 Dataset/
 
+# PyDev
+.project
+.pydevproject
+
 # metadata
 .metadata/*
 .metadata/
