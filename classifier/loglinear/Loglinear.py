@@ -70,4 +70,3 @@ class TrainedLoglinearModel(TrainedClassifierModel):
     
     def predict_all(self, list_of_tokens):
         return [self.predict(t) for t in list_of_tokens]
-        
