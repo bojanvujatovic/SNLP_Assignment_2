@@ -4,7 +4,7 @@ from scipy.sparse import csr_matrix
 from classifier.ClassifierModel import ClassifierModel, TrainedClassifierModel
 
 
-class PerceptronModel(ClassifierModel):
+class LoglinearModel(ClassifierModel):
 
     def __init__(self, gold, phi, classes, alpha, max_iterations=10):
         self.gold = gold
@@ -36,10 +36,16 @@ class PerceptronModel(ClassifierModel):
             if not changed:
                 break
 
-        return TrainedPerceptonModel(weights, self)
+        return TrainedLoglinearModel(weights, self)
 
 
-class TrainedPerceptonModel(TrainedClassifierModel):
+class StructuredLoglinearModel(LoglinearModel):
+
+    def argmax(self, word, weights):
+        raise NotImplementedError
+
+
+class TrainedLoglinearModel(TrainedClassifierModel):
 
     def __init__(self, weights, perceptron_model):
         self.__weights = weights
