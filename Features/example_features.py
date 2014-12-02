@@ -24,9 +24,6 @@ def word_class_template_feature(event_candidate_args, word_dict, class_dict, tok
     i = array([word_dict[token.word] * N_classes + class_dict[event_candidate]])
     j = array([0]) 
 
-    print data, i, j
-    print len(data), len(i), len(j)
-
     return csc_matrix((data, (i, j)), shape=(N_words*N_classes, 1), dtype=int8)
 
 # Token has a capital letter
