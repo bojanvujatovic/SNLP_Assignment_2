@@ -5,7 +5,6 @@ from classifier.ClassifierModel import ClassifierModel, TrainedClassifierModel
 
 
 class LoglinearModel(ClassifierModel):
-
     def __init__(self, gold, phi, classes, alpha, max_iterations=10):
         self.gold = gold
         self.phi = phi
@@ -40,13 +39,28 @@ class LoglinearModel(ClassifierModel):
 
 
 class StructuredLoglinearModel(LoglinearModel):
+    # if label(x) == None: no arguments
+    # if label(x) != None: at least 1 theme
+    # if label(x) == Regulation: there can exist cause argument
 
     def argmax(self, word, weights):
-        raise NotImplementedError
+        arg_types = ['None', 'Theme', 'Cause']
+        prediction = []
+        for w in word.sentence:
+            if w == word:
+                continue
+
+            prob = (0.0, arg_types[0])
+            for t in arg_types:
+                t_prob = self.phi(w, t).T * weights
+                if t_prob > prob[0]:
+                    prob = (t_prob, t)
+
+            prediction.append(prob[1])
+        return prediction
 
 
 class TrainedLoglinearModel(TrainedClassifierModel):
-
     def __init__(self, weights, perceptron_model):
         self.__weights = weights
         self.__perceptron_model = perceptron_model
