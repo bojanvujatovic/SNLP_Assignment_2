@@ -111,10 +111,16 @@ class Sentences(object):
         
         for sentence in self.sentences:
             for token in sentence.tokens:
-                print token.word, token.event_candidate
                 if token.event_candidate != "None" and token.event_candidate != None and ret.get(token.event_candidate, None) == None:
                     ret[token.word] = counter
                     counter += 1
+                    
+                    if '-' in token.word:
+                        for word_t in token.word.split('-'):
+                            if ret.get(word_t, None) == None and len(word_t) > 0:
+                                ret[word_t] = counter
+                                counter += 1
+                    
 
         return ret
     
