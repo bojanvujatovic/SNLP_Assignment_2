@@ -44,13 +44,15 @@ def mainmiljan():
     (train_sentences, hand_out_sentences) = all_train_sentences.split_randomly(0.8)
     
     #test_sentences = Paragraphs("Dataset/Test/").all_sentences()
-    
+    n = 2
     word_dict = train_sentences.get_word_dict()
     class_dict = train_sentences.get_class_dict()
     trigger_dict = train_sentences.get_trigger_dict()
+    ngram_dict = train_sentences.get_ngram_dict(n)
     
-    print class_dict
-    print trigger_dict
+#     print class_dict
+#     print trigger_dict
+    print ngram_dict
       
     for token in train_sentences.sentences[0].tokens:
         print token.word + " "
@@ -60,8 +62,9 @@ def mainmiljan():
 
 #     pos_class_feature(train_sentences.sentences[0].tokens[25], 'None', word_dict, class_dict)
     
-    print train_sentences.sentences[0].tokens[0].word
-    pos_class_feature(class_dict, train_sentences.sentences[0].tokens[0], "Transcription")
+    print 'Word is ', train_sentences.sentences[0].tokens[0].word
+#     word_class_template_feature(None, word_dict, class_dict, token, "None")
+    character_ngram_feature(n, ngram_dict, class_dict, train_sentences.sentences[0].tokens[0], "Regulation")
 
 if __name__ == "__main__":
     mainmiljan()
