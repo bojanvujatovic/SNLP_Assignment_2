@@ -28,8 +28,14 @@ def main():
     class_dict = train_sentences.get_class_dict()
     trigger_dict = train_sentences.get_trigger_dict()
     
-    print class_dict
-    print trigger_dict
+    #for word in trigger_dict:
+    #    print word
+    
+    print len(word_dict)
+    print len(trigger_dict)
+    
+    
+
     
     word_class_template_feature(train_sentences.sentences[1].tokens[1], "None", None, word_dict, class_dict)
 

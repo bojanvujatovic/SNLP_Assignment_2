@@ -29,6 +29,8 @@ Dataset/
 .project
 .pydevproject
 
+.settings/
+
 # metadata
 .metadata/*
 .metadata/
