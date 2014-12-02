@@ -123,6 +123,8 @@ class Sentences(object):
                     
         return ret
     
+    def get_char_list(self):
+        return []
         
 class Sentence(object):
     '''
