@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from scipy.sparse import csr_matrix
+from scipy.sparse import csc_matrix
 from classifier.ClassifierModel import ClassifierModel, TrainedClassifierModel
 
 
@@ -23,7 +23,7 @@ class LoglinearModel(ClassifierModel):
 
     def train(self, tokens):
         phi_length = self.phi(tokens[0], self.classes[0]).shape[0]
-        weights = csr_matrix((phi_length, 1))
+        weights = csc_matrix((phi_length, 1))
 
         for iterations in range(1, self.max_iterations):
             changed = False
