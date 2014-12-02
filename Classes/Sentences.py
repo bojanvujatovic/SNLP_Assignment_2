@@ -122,15 +122,14 @@ class Sentences(object):
                                 counter += 1     
         return ret
     
-    def get_char_dict(self):
+    def get_ngram_dict(self, n):
         ret = {}
         counter = 0
-        n = 2
         
         for sentence in self.sentences:
             for token in sentence.tokens:
-                bigrams = [token.word[i:i+n] for i in range(len(token.word)-n+1)]
-                for key in bigrams:
+                ngrams = [token.word[i:i+n] for i in range(len(token.word)-n+1)]
+                for key in ngrams:
                     if key not in ret:
                         ret[key] = counter
                         counter += 1

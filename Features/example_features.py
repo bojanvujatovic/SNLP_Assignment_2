@@ -24,6 +24,9 @@ def word_class_template_feature(event_candidate_args, word_dict, class_dict, tok
     i = array([word_dict[token.word] * N_classes + class_dict[event_candidate]])
     j = array([0]) 
 
+    print data, i, j
+    print len(data), len(i), len(j)
+
     return csc_matrix((data, (i, j)), shape=(N_words*N_classes, 1), dtype=int8)
 
 # Token has a capital letter
@@ -115,15 +118,19 @@ def pos_class_feature(class_dict, token, event_candidate):
     
     return csc_matrix((data, (i, j)), shape=(N_classes, 1), dtype=int8)
 
-# Bigrams of characters
-def character_bigram_feature(bigram_combinations, class_dict, token, event_candidate):
+# Ngrams of characters
+def character_ngram_feature(n, ngram_combinations, class_dict, token, event_candidate):
     
     N_classes = len(class_dict)
+    N_ngrams = len(ngram_combinations)
+    ngrams = [token.word[i:i+n] for i in range(len(token.word)-n+1)]
      
-    data = array([1])
-    i = array([bigram_combinations[event_candidate]])
-    j = array([0])
+    data = array([1] * len(ngrams))
+    i = array([index * N_classes + class_dict[event_candidate] 
+              for index in [ngram_combinations[ngram] for ngram in ngrams]])
+    j = array([0] * len(ngrams))
     
-    return csc_matrix((data, (i, j)), shape=(N_classes, 1), dtype=int8)
+    print csc_matrix((data, (i, j)), shape=(N_ngrams*N_classes, 1), dtype=int8)
+    return csc_matrix((data, (i, j)), shape=(N_ngrams*N_classes, 1), dtype=int8)
     
     
