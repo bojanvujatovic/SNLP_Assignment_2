@@ -1,2 +1,5 @@
 eclipse.preferences.version=1
+encoding//classifier/ClassifierModel.py=utf-8
+encoding//classifier/loglinear/Loglinear.py=utf-8
+encoding//classifier/naivebayes/naivebayes.py=utf-8
 encoding/main.py=utf-8
