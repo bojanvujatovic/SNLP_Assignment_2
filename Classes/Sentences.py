@@ -30,7 +30,7 @@ class Paragraphs(object):
                     file_content = f.read() 
                     json_paragraph = decoder.decode(file_content)    
                     
-                    if json_paragraph.get("txt", None) != None and json_paragraph.get("sentences", None):
+                    if not json_paragraph.get("txt", None) is None and json_paragraph.get("sentences", None):
                         self.paragraphs.append(Paragraph(file_name, json_paragraph["txt"], json_paragraph["sentences"]))   
         
     def all_sentences(self):
@@ -85,7 +85,7 @@ class Sentences(object):
         
         for sentence in self.sentences:
             for token in sentence.tokens:
-                if ret.get(token.word, None) == None:
+                if ret.get(token.word, None) is None:
 
                     ret[token.word] = counter
                     counter += 1
@@ -98,7 +98,7 @@ class Sentences(object):
         
         for sentence in self.sentences:
             for token in sentence.tokens:
-                if ret.get(token.event_candidate, None) == None and token.event_candidate != None:
+                if ret.get(token.event_candidate, None) is None and not token.event_candidate is None:
                     ret[token.event_candidate] = counter
                     counter += 1
         
@@ -111,17 +111,16 @@ class Sentences(object):
         
         for sentence in self.sentences:
             for token in sentence.tokens:
-                if token.event_candidate != "None" and token.event_candidate != None and ret.get(token.event_candidate, None) == None:
+                if token.event_candidate != "None" and not token.event_candidate is None and ret.get(token.event_candidate, None) is None:
                     ret[token.word] = counter
                     counter += 1
                     
                     if '-' in token.word:
                         for word_t in token.word.split('-'):
-                            if ret.get(word_t, None) == None and len(word_t) > 0:
+                            if ret.get(word_t, None) is None and len(word_t) > 0:
                                 ret[word_t] = counter
                                 counter += 1
                     
-
         return ret
     
         
@@ -142,7 +141,7 @@ class Sentence(object):
             index = token.get("index", None)
             word = token.get("word", None)
             
-            if word == None:
+            if word is None:
                 continue
             
             mentions = []
