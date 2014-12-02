@@ -115,4 +115,15 @@ def pos_class_feature(class_dict, token, event_candidate):
     
     return csc_matrix((data, (i, j)), shape=(N_classes, 1), dtype=int8)
 
+# Bigrams of characters
+def character_bigram_feature(bigram_combinations, class_dict, token, event_candidate):
+    
+    N_classes = len(class_dict)
+     
+    data = array([1])
+    i = array([bigram_combinations[event_candidate]])
+    j = array([0])
+    
+    return csc_matrix((data, (i, j)), shape=(N_classes, 1), dtype=int8)
+    
     

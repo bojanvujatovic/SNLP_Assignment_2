@@ -119,12 +119,22 @@ class Sentences(object):
                         for word_t in token.word.split('-'):
                             if ret.get(word_t, None) is None and len(word_t) > 0:
                                 ret[word_t] = counter
-                                counter += 1
-                    
+                                counter += 1     
         return ret
     
-    def get_char_list(self):
-        return []
+    def get_char_dict(self):
+        ret = {}
+        counter = 0
+        n = 2
+        
+        for sentence in self.sentences:
+            for token in sentence.tokens:
+                bigrams = [token.word[i:i+n] for i in range(len(token.word)-n+1)]
+                for key in bigrams:
+                    if key not in ret:
+                        ret[key] = counter
+                        counter += 1
+        return ret
         
 class Sentence(object):
     '''
