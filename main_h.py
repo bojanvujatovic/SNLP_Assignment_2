@@ -12,7 +12,7 @@ def main():
     class_dict = train_sentences.get_class_dict()
     trigger_dict = train_sentences.get_trigger_dict()
 
-    # print class_dict
+    print class_dict
     # print len(class_dict)
     # print trigger_dict
 
