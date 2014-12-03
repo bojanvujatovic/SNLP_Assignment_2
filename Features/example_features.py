@@ -103,7 +103,7 @@ def pos_class_feature(class_dict, token, event_candidate):
                 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ',
                 'JJ', 'JJR', 'JJS']
     # append the protein entry to the class list
-    class_dict.update({"Protein": len(class_dict) + 1})
+    # class_dict.update({"Protein": len(class_dict) + 1})
     n_classes = len(class_dict)
 
     if token.pos in pos_tags:
