@@ -15,13 +15,15 @@ class LoglinearModel(ClassifierModel):
     def argmax(self, word, weights):
         max = (0.0, self.classes[0])
         for c in self.classes:
+            # print self.phi(word, c).shape
+            # print weights.shape
             c_prob = self.phi(word, c).T * weights
             if c_prob > max[0]:
                 max = (c_prob, c)
         return max[1]
 
     def train(self, tokens):
-        phi_length = self.phi(tokens[0], self.classes[0]).shape[0]
+        phi_length = self.phi(tokens[1], self.classes[1]).shape[0]
         weights = csc_matrix((phi_length, 1))
 
         for iterations in range(1, self.max_iterations):
@@ -30,6 +32,8 @@ class LoglinearModel(ClassifierModel):
                 prediction = self.argmax(token, weights)
                 truth = self.gold(token)
                 if truth != prediction:
+                    # print prediction
+                    # print truth
                     weights = weights + self.alpha * (self.phi(token, prediction) - self.phi(token, truth))
                     changed = True
             if not changed:
