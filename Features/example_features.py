@@ -1,7 +1,7 @@
 '''example_feature.py
 '''
 
-from scipy.sparse import csc_matrix, vstack
+from scipy.sparse import csr_matrix, vstack
 from scipy import array
 
 
@@ -15,7 +15,7 @@ def word_template_feature(word_dict, token):
         i = array([word_dict['<<UNK>>']])
     j = array([0])
 
-    return csc_matrix((data, (i, j)), shape=(n_words, 1))
+    return csr_matrix((data, (i, j)), shape=(n_words, 1))
 
 
 # Word belongs to a class                      
@@ -31,7 +31,8 @@ def word_class_template_feature(word_dict, class_dict, token, event_candidate):
         i = array([word_dict['<<UNK>>'] * n_classes + class_dict[event_candidate]])
     j = array([0])
 
-    return csc_matrix((data, (i, j)), shape=(n_words * n_classes, 1))
+    return csr_matrix((data, (i, j)), shape=(n_words * n_classes, 1))
+
 
 # Token has a capital letter
 def capital_letter_feature(class_dict, token, event_candidate):
@@ -44,7 +45,7 @@ def capital_letter_feature(class_dict, token, event_candidate):
     i = array([class_dict[event_candidate]])
     j = array([0])
 
-    return csc_matrix((data, (i, j)), shape=(n_classes, 1))
+    return csr_matrix((data, (i, j)), shape=(n_classes, 1))
 
 
 # Token is in the trigger dictionary
@@ -58,7 +59,7 @@ def token_in_trigger_dict_feature(class_dict, trigger_dict, token, event_candida
     i = array([class_dict[event_candidate]])
     j = array([0])
 
-    return csc_matrix((data, (i, j)), shape=(n_classes, 1))
+    return csr_matrix((data, (i, j)), shape=(n_classes, 1))
 
 
 # Token has a number
@@ -72,7 +73,7 @@ def number_in_token_feature(class_dict, token, event_candidate):
     i = array([class_dict[event_candidate]])
     j = array([0])
 
-    return csc_matrix((data, (i, j)), shape=(n_classes, 1))
+    return csr_matrix((data, (i, j)), shape=(n_classes, 1))
 
 
 # Token is in a protein
@@ -86,7 +87,7 @@ def token_in_protein_feature(class_dict, token, event_candidate):
     i = array([class_dict[event_candidate]])
     j = array([0])
 
-    return csc_matrix((data, (i, j)), shape=(n_classes, 1))
+    return csr_matrix((data, (i, j)), shape=(n_classes, 1))
 
 
 # Token is after "-"
@@ -100,7 +101,7 @@ def token_is_after_dash_feature(class_dict, token, event_candidate):
     i = array([class_dict[event_candidate]])
     j = array([0])
 
-    return csc_matrix((data, (i, j)), shape=(n_classes, 1))
+    return csr_matrix((data, (i, j)), shape=(n_classes, 1))
 
 
 # POS tags combined with class; events are usually nouns, verbs or adjectives
@@ -119,7 +120,7 @@ def pos_class_feature(class_dict, token, event_candidate):
     i = array([class_dict[event_candidate]])
     j = array([0])
 
-    return csc_matrix((data, (i, j)), shape=(n_classes, 1))
+    return csr_matrix((data, (i, j)), shape=(n_classes, 1))
 
 
 # Ngrams of characters
@@ -140,8 +141,8 @@ def character_ngram_feature(n, ngram_combinations, class_dict, token, event_cand
     i = array([index * n_classes + class_dict[event_candidate] for index in ngram_indices])
     j = array([0] * len(ngrams))
 
-    # print csc_matrix((data, (i, j)), shape=(n_grams * n_classes, 1))
-    return csc_matrix((data, (i, j)), shape=(n_grams * n_classes, 1))
+    # print csr_matrix((data, (i, j)), shape=(n_grams * n_classes, 1))
+    return csr_matrix((data, (i, j)), shape=(n_grams * n_classes, 1))
 
 
 def whole_set_of_features(word_dict, class_dict, trigger_dict, n, ngram_combinations, token, event_candidate):
