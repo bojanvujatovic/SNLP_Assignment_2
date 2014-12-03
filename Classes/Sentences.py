@@ -65,6 +65,9 @@ class Sentences(object):
         for sentence in sentences:
             self.sentences.append(Sentence(paragraph_txt, sentence))
     
+    def tokens(self):
+        return [t for s in self.sentences for t in s.tokens]
+    
     def split_randomly(self, split_percentage):
         A = Sentences("", [])
         B = Sentences("", [])
