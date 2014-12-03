@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from scipy.sparse import csc_matrix
+from scipy.sparse import csr_matrix
 from classifier.ClassifierModel import ClassifierModel, TrainedClassifierModel
 
 
-class LoglinearModel(ClassifierModel):
+class NaiveBayes(ClassifierModel):
 
-    def __init__(self, gold, phi, classes, alpha, max_iterations=10):
+    def __init__(self, gold, phi, classes):
         self.gold = gold
         self.phi = phi
         self.classes = classes
-        self.alpha = alpha
-        self.max_iterations = max_iterations
 
     def argmax(self, word, weights):
         max = (0.0, self.classes[0])
@@ -23,33 +21,26 @@ class LoglinearModel(ClassifierModel):
 
     def train(self, tokens):
         phi_length = self.phi(tokens[0], self.classes[0]).shape[0]
-        weights = csc_matrix((phi_length, 1))
+        counts = [csr_matrix((phi_length, 1)) for i in range(len(self.classes))]
+        class_counts = [0.0] * len(self.classes)
+        
+        for token in tokens:
+            class_idx = self.classes[token.event_candidate]
+            class_counts[class_idx] += 1
+            token_phi = self.phi(token, token.event_candidate)
+            
+            counts[class_idx] = counts[class_idx] + token_phi
+        
+        for i in range(len(self.classes)):
+            counts[i] = counts[i] * 1.0/class_counts[i]
 
-        for iterations in range(1, self.max_iterations):
-            changed = False
-            for token in tokens:
-                prediction = self.argmax(token, weights)
-                truth = self.gold(token)
-                if truth != prediction:
-                    weights += self.alpha * (self.phi(token, prediction) - self.phi(token, truth))
-                    changed = True
-            if not changed:
-                break
+        print counts
+        return TrainedLoglinearModel(counts)
 
-        return TrainedLoglinearModel(weights, self)
+class TrainedNaiveBayes(TrainedClassifierModel):
 
-
-class StructuredLoglinearModel(LoglinearModel):
-
-    def argmax(self, word, weights):
-        raise NotImplementedError
-
-
-class TrainedLoglinearModel(TrainedClassifierModel):
-
-    def __init__(self, weights, perceptron_model):
-        self.__weights = weights
-        self.__perceptron_model = perceptron_model
+    def __init__(self, probabilities):
+        self.__probabilities = probabilities
 
     def predict(self, token):
-        return self.__perceptron_model.get_argmax(token, self.__weights)
+        return 0
