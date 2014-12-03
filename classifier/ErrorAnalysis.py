@@ -66,15 +66,17 @@ def precision_recall_f1(l_true_labels, l_predicted_labels, event_label):
         if l_true_labels[i] == event_label and l_predicted_labels[i] == event_label:
             d_confusion_matrix['tp'] += 1
         # true negatives
-        elif l_true_labels[i] == 'None' and l_predicted_labels[i] != event_label:
+        elif l_true_labels[i] != event_label and l_predicted_labels[i] != event_label:
             d_confusion_matrix['tn'] += 1
         # false positivies
-        elif l_true_labels[i] == 'None' and l_predicted_labels[i] == event_label:
+        elif l_true_labels[i] != event_label and l_predicted_labels[i] == event_label:
             d_confusion_matrix['fp'] += 1
         # false negatives
         elif l_true_labels[i] == event_label and l_predicted_labels[i] != event_label:
             d_confusion_matrix['fn'] += 1
-    
+
+    print d_confusion_matrix
+
     precision = d_confusion_matrix['tp'] / (d_confusion_matrix['tp']+d_confusion_matrix['fp'])
     recall = d_confusion_matrix['tp'] / (d_confusion_matrix['tp']+d_confusion_matrix['fn'])
     f1_score = (2 * precision * recall) / (precision + recall)

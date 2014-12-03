@@ -92,7 +92,7 @@ class Sentences(object):
 
                     ret[token.word] = counter
                     counter += 1
-            
+        ret['<<UNK>>'] = counter
         return ret
     
     def get_class_dict(self):
@@ -136,6 +136,7 @@ class Sentences(object):
                     if key not in ret:
                         ret[key] = counter
                         counter += 1
+        ret['<<UNK>>'] = counter
         return ret
         
 class Sentence(object):

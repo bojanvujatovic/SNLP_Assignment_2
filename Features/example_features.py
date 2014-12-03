@@ -9,7 +9,10 @@ def word_template_feature(word_dict, token):
     n_words = len(word_dict)
 
     data = array([1])
-    i = array([word_dict[token.word]])
+    try:
+        i = array([word_dict[token.word]])
+    except:
+        i = array([word_dict['<<UNK>>']])
     j = array([0])
 
     return csc_matrix((data, (i, j)), shape=(n_words, 1))
@@ -22,7 +25,10 @@ def word_class_template_feature(word_dict, class_dict, token, event_candidate):
 
     data = array([1])
 
-    i = array([word_dict[token.word] * n_classes + class_dict[event_candidate]])
+    try:
+        i = array([word_dict[token.word] * n_classes + class_dict[event_candidate]])
+    except:
+        i = array([word_dict['<<UNK>>'] * n_classes + class_dict[event_candidate]])
     j = array([0])
 
     return csc_matrix((data, (i, j)), shape=(n_words * n_classes, 1))
@@ -123,8 +129,15 @@ def character_ngram_feature(n, ngram_combinations, class_dict, token, event_cand
     ngrams = [token.word[i:i + n] for i in range(len(token.word) - n + 1)]
 
     data = array([1] * len(ngrams))
-    i = array([index * n_classes + class_dict[event_candidate]
-               for index in [ngram_combinations[ngram] for ngram in ngrams]])
+
+    ngram_indices = []
+    for ngram in ngrams:
+        try:
+            ngram_indices.append(ngram_combinations[ngram])
+        except:
+            ngram_indices.append(ngram_combinations['<<UNK>>'])
+
+    i = array([index * n_classes + class_dict[event_candidate] for index in ngram_indices])
     j = array([0] * len(ngrams))
 
     # print csc_matrix((data, (i, j)), shape=(n_grams * n_classes, 1))
