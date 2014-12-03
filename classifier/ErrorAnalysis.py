@@ -88,6 +88,3 @@ def precision_recall_f1(l_true_labels, l_predicted_labels, event_label):
     print 'F1 score is: ', f1_score
     print '------------------'
         
-    
-    
-    
