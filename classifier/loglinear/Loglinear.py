@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from numpy import argmax, mat, zeros
+from numpy import argmax, mat, zeros, copy
 
 from scipy.sparse import csc_matrix, csr_matrix
 from classifier.ClassifierModel import ClassifierModel, TrainedClassifierModel
@@ -28,13 +28,12 @@ class LoglinearModel(ClassifierModel):
                 prediction = self.get_argmax(token, weights)
                 truth = self.gold(token)
                 if truth != prediction:
-                    # print prediction
-                    # print truth
-                    weights = weights + self.alpha * (self.phi(token, prediction) - self.phi(token, truth))
+                    difference = self.phi(token, truth) - self.phi(token, prediction)
+                    weights = weights + self.alpha * difference
                     changed = True
             if not changed:
                 break
-
+        print weights
         return TrainedLoglinearModel(weights, self)
 
 

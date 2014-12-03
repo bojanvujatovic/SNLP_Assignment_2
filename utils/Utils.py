@@ -6,6 +6,7 @@ def subsample_none(tokens, fraction, seed=time.clock()):
     random.seed(seed)
     return [t for t in tokens if t.event_candidate != 'None' or random.random() < fraction]
 
+
 def subsample_label(tokens, label, fraction, seed=time.clock()):
     random.seed(seed)
     return [t for t in tokens if t.event_candidate != label or random.random() < fraction]

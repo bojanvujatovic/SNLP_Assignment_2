@@ -155,6 +155,15 @@ def word_belongs_to_class_feature(class_dict, token, event_candidate):
 
     return csr_matrix((data, (i, j)), shape=(n_classes, 1))
 
+def word_stem(stem_dict, token, event_candidate):
+    n_classes = len(stem_dict)
+
+    data = array([1])
+    i = array([stem_dict[token.stem]])
+    j = array([0])
+
+    return csr_matrix((data, (i, j)), shape=(n_classes, 1))
+
 def whole_set_of_features(word_dict, class_dict, trigger_dict, n, ngram_combinations, token, event_candidate):
     return vstack([word_template_feature(word_dict, token),
                    word_class_template_feature(word_dict, class_dict, token, event_candidate),
