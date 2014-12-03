@@ -22,7 +22,7 @@ def main():
         train_sentences.sentences[0].tokens)
 
     prediction = classifier.predict(train_sentences.sentences[0].tokens[0])
-
+    
     print prediction
 
 
