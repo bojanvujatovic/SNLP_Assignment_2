@@ -148,10 +148,11 @@ def character_ngram_feature(n, ngram_combinations, class_dict, token, event_cand
 def whole_set_of_features(word_dict, class_dict, trigger_dict, n, ngram_combinations, token, event_candidate):
     return vstack([word_template_feature(word_dict, token),
                    word_class_template_feature(word_dict, class_dict, token, event_candidate),
-                   capital_letter_feature(class_dict, token, event_candidate),
-                   token_in_trigger_dict_feature(class_dict, trigger_dict, token, event_candidate),
-                   number_in_token_feature(class_dict, token, event_candidate),
-                   token_in_protein_feature(class_dict, token, event_candidate),
-                   token_is_after_dash_feature(class_dict, token, event_candidate),
-                   pos_class_feature(class_dict, token, event_candidate),
-                   character_ngram_feature(n, ngram_combinations, class_dict, token, event_candidate)])
+                   # capital_letter_feature(class_dict, token, event_candidate),
+                   # token_in_trigger_dict_feature(class_dict, trigger_dict, token, event_candidate),
+                   # number_in_token_feature(class_dict, token, event_candidate),
+                   # token_in_protein_feature(class_dict, token, event_candidate),
+                   # token_is_after_dash_feature(class_dict, token, event_candidate),
+                   # pos_class_feature(class_dict, token, event_candidate),
+                   # character_ngram_feature(n, ngram_combinations, class_dict, token, event_candidate)
+                   ])
