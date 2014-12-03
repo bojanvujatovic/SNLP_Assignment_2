@@ -52,4 +52,4 @@ class TrainedLoglinearModel(TrainedClassifierModel):
         self.__perceptron_model = perceptron_model
 
     def predict(self, token):
-        return self.__perceptron_model.argmax(token, self.__weights)
+        return self.__perceptron_model.get_argmax(token, self.__weights)

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from numpy import argmax
 
 from scipy.sparse import csc_matrix
 from classifier.ClassifierModel import ClassifierModel, TrainedClassifierModel
@@ -12,15 +13,9 @@ class LoglinearModel(ClassifierModel):
         self.alpha = alpha
         self.max_iterations = max_iterations
 
-    def argmax(self, word, weights):
-        max = (0.0, self.classes[0])
-        for c in self.classes:
-            # print self.phi(word, c).shape
-            # print weights.shape
-            c_prob = self.phi(word, c).T * weights
-            if c_prob > max[0]:
-                max = (c_prob, c)
-        return max[1]
+    def get_argmax(self, word, weights):
+        best_index = argmax([(self.phi(word, c).T * weights)[0, 0] for c in self.classes])
+        return self.classes[best_index]
 
     def train(self, tokens):
         phi_length = self.phi(tokens[1], self.classes[1]).shape[0]
@@ -29,7 +24,7 @@ class LoglinearModel(ClassifierModel):
         for iterations in range(1, self.max_iterations):
             changed = False
             for token in tokens:
-                prediction = self.argmax(token, weights)
+                prediction = self.get_argmax(token, weights)
                 truth = self.gold(token)
                 if truth != prediction:
                     # print prediction
@@ -47,7 +42,7 @@ class StructuredLoglinearModel(LoglinearModel):
     # if label(x) != None: at least 1 theme
     # if label(x) == Regulation: there can exist cause argument
 
-    def argmax(self, word, weights):
+    def get_argmax(self, word, weights):
         arg_types = ['None', 'Theme', 'Cause']
         prediction = []
         for w in word.sentence:
@@ -70,7 +65,7 @@ class TrainedLoglinearModel(TrainedClassifierModel):
         self.__perceptron_model = perceptron_model
 
     def predict(self, token):
-        return self.__perceptron_model.argmax(token, self.__weights)
+        return self.__perceptron_model.get_argmax(token, self.__weights)
     
     def predict_all(self, list_of_tokens):
         return [self.predict(t) for t in list_of_tokens]
