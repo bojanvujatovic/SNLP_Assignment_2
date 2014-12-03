@@ -187,6 +187,8 @@ class Sentence(object):
                 if index >= e.get("begin", None) and index < e.get("end", None):
                     event_candidate = e.get("gold", None)
                     break
+            if event_candidate == None:
+                 event_candidate = "None"
                   
             event_candidate_args = [] 
             args = []
