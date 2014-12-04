@@ -6,20 +6,18 @@ from math import log
 
 class NaiveBayes(ClassifierModel):
 
-    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations):
+    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict):
         self.class_dict = class_dict
         self.stem_dict = stem_dict
         self.word_dict = word_dict
         self.trigger_dict = trigger_dict
-        self.n = n
-        self.ngram_combinations = ngram_combinations
 
     def train(self, tokens, feature_strings):
         
         feature_counts = []
         for f in feature_strings:
             feature_class = globals()[f]
-            feature_counts.append(feature_class(self.stem_dict, self.word_dict, self.class_dict, self.trigger_dict, self.n, self.ngram_combinations))
+            feature_counts.append(feature_class(self.stem_dict, self.word_dict, self.class_dict, self.trigger_dict))
         
         class_count = {}
         for c in self.class_dict:
@@ -55,6 +53,10 @@ class TrainedNaiveBayes(TrainedClassifierModel):
         
         return c_max
     
+    def predict_all(self, list_of_tokens):
+        return [self.predict(t) for t in list_of_tokens]
+
+   
 class feature(object):
     def __init__(self, class_dict, N_per_class):
         self.class_dict = class_dict
@@ -68,7 +70,7 @@ class feature(object):
                 self.counts[class_id][j] = (self.counts[class_id][j] + alpha) / (float(class_count[class_string]) + len(class_count)*alpha)
     
 class capital_letter_class_feature(feature):
-    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations):
+    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict):
         super(capital_letter_class_feature, self).__init__(class_dict, 1)
             
     def update(self, token, event_candidate):
@@ -85,7 +87,7 @@ class capital_letter_class_feature(feature):
             return 1 - self.counts[class_id][0]
             
 class class_feature(feature):
-    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations):
+    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict):
         super(class_feature, self).__init__(class_dict, 1)
             
     def update(self, token, event_candidate):
@@ -104,7 +106,7 @@ class class_feature(feature):
         return self.counts[class_id][0]
     
 class word_class_feature(feature):
-    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations):
+    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict):
         word_dict["<<<<<UNK>>>>>"] = len(word_dict)
         
         super(word_class_feature, self).__init__(class_dict, len(word_dict))
@@ -125,7 +127,7 @@ class word_class_feature(feature):
         return self.counts[class_id][word_id]
     
 class token_in_trigger_dict_class_feature(feature):
-    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations):
+    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict):
         super(token_in_trigger_dict_class_feature, self).__init__(class_dict, 1)
         self.trigger_dict = trigger_dict
             
@@ -143,7 +145,7 @@ class token_in_trigger_dict_class_feature(feature):
             return 1 - self.counts[class_id][0]
         
 class number_in_token_class_feature(feature):
-    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations):
+    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict):
         super(number_in_token_class_feature, self).__init__(class_dict, 1)
         self.trigger_dict = trigger_dict
             
@@ -161,7 +163,7 @@ class number_in_token_class_feature(feature):
             return 1 - self.counts[class_id][0]
         
 class word_stem_class_feature(feature):
-    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations):
+    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict):
         stem_dict["<<<<<UNK>>>>>"] = len(stem_dict)
         
         super(word_stem_class_feature, self).__init__(class_dict, len(stem_dict))
@@ -182,7 +184,7 @@ class word_stem_class_feature(feature):
         return self.counts[class_id][word_id]
     
 class pos_class_feature(feature):
-    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations):
+    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict):
         super(pos_class_feature, self).__init__(class_dict, 1)
         self.pos_tags = ['NN', 'NNP', 'NNS', 'NNPS',
                 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ',
@@ -202,8 +204,8 @@ class pos_class_feature(feature):
             return 1 - self.counts[class_id][0]
         
 class token_is_after_dash_feature(feature):
-    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations):
-        super(pos_class_feature, self).__init__(class_dict, 1)
+    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict):
+        super(token_is_after_dash_feature, self).__init__(class_dict, 1)
             
     def update(self, token, event_candidate):
         class_id = self.class_dict[event_candidate]
