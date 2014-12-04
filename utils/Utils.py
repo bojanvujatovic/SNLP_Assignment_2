@@ -13,7 +13,9 @@ def subsample_label(tokens, label, fraction, seed=time.clock()):
 
 
 def get_word_dict(tokens):
-    return dict(map(lambda p: (p[1], p[0]), enumerate(set([t.word for t in tokens]))))
+    word_dict = dict(map(lambda p: (p[1], p[0]), enumerate(set([t.word for t in tokens]))))
+    word_dict['<<UNK>>'] = len(word_dict)
+    return word_dict
 
 
 def get_class_dict(tokens):
@@ -22,3 +24,10 @@ def get_class_dict(tokens):
 
 def get_stem_dict(tokens):
     return dict(map(lambda p: (p[1], p[0]), enumerate(set([t.stem for t in tokens]))))
+
+
+def get_ngram_dict(tokens, n):
+    ngram_dict = dict(map(lambda p: (p[1], p[0]),
+                          enumerate(set([t.word[i:i + n] for t in tokens for i in range(len(t.word) - n + 1)]))))
+    ngram_dict['<<UNK>>'] = len(ngram_dict)
+    return ngram_dict

@@ -7,6 +7,7 @@ from classifier.ErrorAnalysis import precision_recall_f1
 from classifier.loglinear.Loglinear import LoglinearModel
 import time
 from utils.Utils import *
+import pickle
 
 
 def phi(word, c):
@@ -34,11 +35,10 @@ def main():
 
     all_tokens = train_sentences.tokens()
     subsampled_tokens = subsample_none(all_tokens, 0.1)
-    subsampled_tokens = subsample_label(subsampled_tokens, 'Gene_expression', 0.15)
     class_dict = get_class_dict(subsampled_tokens)
     stem_dict = get_stem_dict(subsampled_tokens)
     word_dict = get_word_dict(subsampled_tokens)
-    word_dict['<<UNK>>'] = len(word_dict)
+    # word_dict['<<UNK>>'] = len(word_dict)
 
     s = Sentences("", [{"tokens": []}])
     s.sentences[0].tokens += subsampled_tokens
@@ -48,7 +48,10 @@ def main():
     # class_dict[t.event_candidate] += 1
     # print class_dict
 
-    feature_strings = ["word_class_template_feature", "capital_letter_feature", "number_in_token_feature"]
+    feature_strings = ["word_class_template_feature",
+                       "capital_letter_feature",
+                       "number_in_token_feature",
+                       "character_ngram_feature"]
     phi = partial(set_of_features, stem_dict, word_dict, class_dict, trigger_dict, 2, train_sentences.get_ngram_dict(2),
                   feature_strings)
 
@@ -74,10 +77,11 @@ def main():
     for sentence in hand_out_sentences.sentences:
         all_test_tokens.extend(sentence.tokens)
 
-    # all_test_tokens = subsample_none(all_test_tokens, 0)
+    all_test_tokens = subsample_none(all_test_tokens, 0)
 
     predictions = classifier.predict_all(all_test_tokens)
     print predictions
+    print len(predictions)
 
     true_labels = []
     for token in all_test_tokens:
@@ -89,24 +93,26 @@ def main():
         print 'Analyzing label: ', label
         precision_recall_f1(true_labels, predictions, label)
 
-    # from sklearn.metrics import confusion_matrix
-    # import matplotlib.pyplot as plt
-    #
-    # y_test = map(lambda t: t.event_candidate, all_test_tokens)
-    # y_pred = predictions
-    #
-    # # Compute confusion matrix
-    # cm = confusion_matrix(y_test, y_pred)
-    #
-    # print(cm)
-    #
-    # # Show confusion matrix in a separate window
-    # plt.matshow(cm)
-    # plt.title('Confusion matrix')
-    # plt.colorbar()
-    # plt.ylabel('True label')
-    # plt.xlabel('Predicted label')
-    # plt.show()
+    from sklearn.metrics import confusion_matrix
+    import matplotlib.pyplot as plt
+
+    y_test = map(lambda t: t.event_candidate, all_test_tokens)
+    y_pred = predictions
+
+    # Compute confusion matrix
+    cm = confusion_matrix(y_test, y_pred)
+
+    print(cm)
+
+    # Show confusion matrix in a separate window
+    plt.matshow(cm)
+    plt.title('Confusion matrix')
+    plt.colorbar()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.show()
+
+    pickle.dump(classifier, open('classifier.p', 'rb'))
 
 
 if __name__ == "__main__":
