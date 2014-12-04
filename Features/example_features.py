@@ -153,16 +153,8 @@ def character_ngram_feature(stem_dict, word_dict, class_dict, trigger_dict, n, n
     return csr_matrix((data, (i, j)), shape=(n_grams * n_classes, 1))
 
 
-# Shady spanish feature
-def word_belongs_to_class_feature(stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations, token,
-                                  event_candidate):
-    n_classes = len(class_dict)
 
-    data = array([1])
-    i = array([class_dict[event_candidate]])
-    j = array([0])
 
-    return csr_matrix((data, (i, j)), shape=(n_classes, 1))
 
 
 def word_stem_feature(stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations, token, event_candidate):
