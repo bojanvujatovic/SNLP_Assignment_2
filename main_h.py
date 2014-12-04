@@ -27,7 +27,7 @@ def main():
     print 'Preprocessing data'
     print '------------------\n'
 
-    used_fraction = 0.15
+    used_fraction = 0.5
     train_fraction = 0.8
     none_fraction = 0.1
 
@@ -47,7 +47,7 @@ def main():
     stem_dict = get_stem_dict(subsampled_tokens)
     word_dict = get_word_dict(subsampled_tokens)
     ngram_order = 2
-    ngram_dict = get_ngram_dict(subsampled_tokens, ngram_order)
+    ngram_dict = get_char_ngram_dict(subsampled_tokens, ngram_order)
     trigger_dict = get_trigger_dict(subsampled_tokens)
 
     # feature_strings = ["word_class_template_feature",

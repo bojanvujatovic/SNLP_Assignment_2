@@ -37,7 +37,7 @@ def main():
     
     nb = NaiveBayes(stem_dict, word_dict, class_dict, trigger_dict, 2, train_sentences.get_ngram_dict(2))
     
-    feature_strings = ["capital_letter_feature", "class_feature"]
+    feature_strings = ["capital_letter_class_feature", "class_feature", "word_class_feature", "token_in_trigger_dict_class_feature", "number_in_token_class_feature", "word_stem_class_feature"]
     trained_nb = nb.train(train_sentences.tokens(), feature_strings)
     
     for s in hand_out_sentences.sentences:
