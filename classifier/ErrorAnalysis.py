@@ -32,7 +32,7 @@
 # trigger_dict = train_sentences.get_trigger_dict()
 # 
 # 
-# phi = partial(whole_set_of_features, word_dict, class_dict, trigger_dict, 2, train_sentences.get_ngram_dict(2))
+# phi = partial(whole_set_of_features, word_dict, class_dict, trigger_dict, 2, train_sentences.get_char_ngram_dict(2))
 # 
 # classifier = Loglinear.LoglinearModel(lambda w: w.event_candidate, phi, class_dict.keys(), 0.8, 10).train(
 #     train_sentences.sentences[0].tokens)
