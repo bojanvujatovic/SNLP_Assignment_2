@@ -13,22 +13,22 @@ class LoglinearModel(ClassifierModel):
         self.alpha = alpha
         self.max_iterations = max_iterations
 
-    def get_argmax(self, word, weights):
-        best_index = argmax([(self.phi(word, c).T * weights)[0, 0] for c in self.classes])
+    def get_argmax(self, word, weights, feature_strings):
+        best_index = argmax([(self.phi(word, c, feature_strings).T * weights)[0, 0] for c in self.classes])
         return self.classes[best_index]
 
-    def train(self, tokens):
-        phi_length = self.phi(tokens[1], self.classes[1]).shape[0]
+    def train(self, tokens, feature_strings):
+        phi_length = self.phi(tokens[1], self.classes[1],feature_strings).shape[0]
         weights = mat(zeros((phi_length, 1)))
 
         for epoch in range(1, self.max_iterations + 1):
             print 'epoch', epoch
             changed = False
             for token in tokens:
-                prediction = self.get_argmax(token, weights)
+                prediction = self.get_argmax(token, weights, feature_strings)
                 truth = self.gold(token)
                 if truth != prediction:
-                    difference = self.phi(token, truth) - self.phi(token, prediction)
+                    difference = self.phi(token, truth, feature_strings) - self.phi(token, prediction, feature_strings)
                     weights = weights + self.alpha * difference
                     changed = True
             if not changed:
@@ -64,8 +64,8 @@ class TrainedLoglinearModel(TrainedClassifierModel):
         self.__weights = weights
         self.__perceptron_model = perceptron_model
 
-    def predict(self, token):
-        return self.__perceptron_model.get_argmax(token, self.__weights)
+    def predict(self, token, feature_strings):
+        return self.__perceptron_model.get_argmax(token, self.__weights, feature_strings)
     
-    def predict_all(self, list_of_tokens):
-        return [self.predict(t) for t in list_of_tokens]
+    def predict_all(self, list_of_tokens, feature_strings):
+        return [self.predict(t, feature_strings) for t in list_of_tokens]
