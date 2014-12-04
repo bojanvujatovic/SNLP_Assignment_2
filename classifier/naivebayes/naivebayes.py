@@ -56,9 +56,9 @@ class TrainedNaiveBayes(TrainedClassifierModel):
         return c_max
     
 class feature(object):
-    def __init__(self, class_dict):
+    def __init__(self, class_dict, N_per_class):
         self.class_dict = class_dict
-        self.counts = [[0] for i in range(len(class_dict))]
+        self.counts = [[0 for j in range(N_per_class)] for i in range(len(class_dict))]
             
     def normalise_add_alpha_smothing(self, class_count, alpha):
         for class_string in class_count:
@@ -67,9 +67,9 @@ class feature(object):
             for j in range(len(self.counts[class_id])):
                 self.counts[class_id][j] = (self.counts[class_id][j] + alpha) / (float(class_count[class_string]) + len(class_count)*alpha)
     
-class capital_letter_feature(feature):
+class capital_letter_class_feature(feature):
     def __init__(self, stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations):
-        super(capital_letter_feature, self).__init__(class_dict)
+        super(capital_letter_class_feature, self).__init__(class_dict, 1)
             
     def update(self, token, event_candidate):
         class_id = self.class_dict[event_candidate]
@@ -86,7 +86,7 @@ class capital_letter_feature(feature):
             
 class class_feature(feature):
     def __init__(self, stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations):
-        super(class_feature, self).__init__(class_dict)
+        super(class_feature, self).__init__(class_dict, 1)
             
     def update(self, token, event_candidate):
         class_id = self.class_dict[event_candidate]
@@ -102,3 +102,60 @@ class class_feature(feature):
     def prob(self, token, c):
         class_id = self.class_dict[c]
         return self.counts[class_id][0]
+    
+class word_class_feature(feature):
+    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations):
+        word_dict["<<<<<UNK>>>>>"] = len(word_dict)
+        
+        super(word_class_feature, self).__init__(class_dict, len(word_dict))
+        self.word_dict = word_dict
+            
+    def update(self, token, event_candidate):
+        class_id = self.class_dict[event_candidate]
+        word_id  = self.word_dict[token.word]
+        
+        self.counts[class_id][word_id] += 1
+        if self.counts[class_id][word_id] == 1:
+            self.counts[class_id][self.word_dict["<<<<<UNK>>>>>"]] += 1
+    
+    def prob(self, token, c):
+        class_id = self.class_dict[c]
+        word_id  = self.word_dict.get(token.word, self.word_dict["<<<<<UNK>>>>>"])
+        
+        return self.counts[class_id][word_id]
+    
+class token_in_trigger_dict_class_feature(feature):
+    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations):
+        super(token_in_trigger_dict_class_feature, self).__init__(class_dict, 1)
+        self.trigger_dict = trigger_dict
+            
+    def update(self, token, event_candidate):
+        class_id = self.class_dict[event_candidate]
+        
+        if token.word in self.trigger_dict:
+            self.counts[class_id][0] += 1
+    
+    def prob(self, token, c):
+        class_id = self.class_dict[c]
+        if token.word in self.trigger_dict:
+            return self.counts[class_id][0]
+        else:
+            return 1 - self.counts[class_id][0]
+        
+class number_in_token_class_feature(feature):
+    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations):
+        super(number_in_token_class_feature, self).__init__(class_dict, 1)
+        self.trigger_dict = trigger_dict
+            
+    def update(self, token, event_candidate):
+        class_id = self.class_dict[event_candidate]
+        
+        if any([char.isdigit() for char in token.word]):
+            self.counts[class_id][0] += 1
+    
+    def prob(self, token, c):
+        class_id = self.class_dict[c]
+        if any([char.isdigit() for char in token.word]):
+            return self.counts[class_id][0]
+        else:
+            return 1 - self.counts[class_id][0]
