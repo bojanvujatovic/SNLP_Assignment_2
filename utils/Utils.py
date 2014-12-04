@@ -31,3 +31,8 @@ def get_ngram_dict(tokens, n):
                           enumerate(set([t.word[i:i + n] for t in tokens for i in range(len(t.word) - n + 1)]))))
     ngram_dict['<<UNK>>'] = len(ngram_dict)
     return ngram_dict
+
+
+def get_trigger_dict(tokens):
+    return dict(map(lambda p: (p[1], p[0]),
+                enumerate(set([trig for t in tokens if t.event_candidate != 'None' for trig in t.word.split('-')]))))
