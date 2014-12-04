@@ -1,10 +1,24 @@
-from numpy import zeros, mat
-from Classes.Sentences import *
+import numpy as np
+from scipy import *
+from Classes.Sentences import Paragraphs, Sentences
 from Features.example_features import *
 from functools import partial
+from classifier.ErrorAnalysis import precision_recall_f1
 from classifier.loglinear.Loglinear import LoglinearModel
 import time
 from utils.Utils import *
+
+
+def phi(word, c):
+    print 'phi(', word, c, ')'
+    x = np.mat(np.zeros((2, 1)))
+    if word[0] == 'increase' and c == 'regulation':
+        print 'case 1'
+        x[0, 0] = 1
+    elif word[0] == 'expression' and c == 'Gene_expression':
+        print 'case 2'
+        x[1, 0] = 1
+    return x
 
 
 def main():
@@ -19,40 +33,80 @@ def main():
     start = time.time()
 
     all_tokens = train_sentences.tokens()
-    subsampled_tokens = subsample_none(all_tokens, 0.0)
+    subsampled_tokens = subsample_none(all_tokens, 0.1)
     subsampled_tokens = subsample_label(subsampled_tokens, 'Gene_expression', 0.15)
     class_dict = get_class_dict(subsampled_tokens)
     stem_dict = get_stem_dict(subsampled_tokens)
     word_dict = get_word_dict(subsampled_tokens)
-    
+    word_dict['<<UNK>>'] = len(word_dict)
+
     s = Sentences("", [{"tokens": []}])
     s.sentences[0].tokens += subsampled_tokens
     trigger_dict = s.get_trigger_dict()
 
     # for t in subsampled_tokens:
-    #     class_dict[t.event_candidate] += 1
+    # class_dict[t.event_candidate] += 1
     # print class_dict
 
-    phi = partial(set_of_features, stem_dict, word_dict, class_dict, trigger_dict, 2, train_sentences.get_ngram_dict(2))
-    
     feature_strings = ["word_class_template_feature", "capital_letter_feature", "number_in_token_feature"]
-    classifier = LoglinearModel(lambda t: t.event_candidate, phi, class_dict.keys(), 0.2, 10).train(subsampled_tokens, feature_strings)
+    phi = partial(set_of_features, stem_dict, word_dict, class_dict, trigger_dict, 2, train_sentences.get_ngram_dict(2),
+                  feature_strings)
+
+    classifier = LoglinearModel(lambda t: t.event_candidate, phi, class_dict.keys(), 0.2, 10).train(subsampled_tokens)
 
     train_end = time.time()
-    print 'training time:', train_end-start
+    print 'training time:', train_end - start
 
     ####################################################################################################################
     ### TEST
     ####################################################################################################################
 
 
-    predictions = classifier.predict_all(subsampled_tokens, feature_strings)
+    predictions = classifier.predict_all(subsampled_tokens)
 
     predict_end = time.time()
 
-    print 'predict time:', predict_end-train_end
+    print 'predict time:', predict_end - train_end
 
     print predictions
+
+    all_test_tokens = []
+    for sentence in hand_out_sentences.sentences:
+        all_test_tokens.extend(sentence.tokens)
+
+    # all_test_tokens = subsample_none(all_test_tokens, 0)
+
+    predictions = classifier.predict_all(all_test_tokens)
+    print predictions
+
+    true_labels = []
+    for token in all_test_tokens:
+        true_labels.append(token.event_candidate)
+
+    test_keys = class_dict.keys()
+    test_keys.pop(0)
+    for label in test_keys:
+        print 'Analyzing label: ', label
+        precision_recall_f1(true_labels, predictions, label)
+
+    # from sklearn.metrics import confusion_matrix
+    # import matplotlib.pyplot as plt
+    #
+    # y_test = map(lambda t: t.event_candidate, all_test_tokens)
+    # y_pred = predictions
+    #
+    # # Compute confusion matrix
+    # cm = confusion_matrix(y_test, y_pred)
+    #
+    # print(cm)
+    #
+    # # Show confusion matrix in a separate window
+    # plt.matshow(cm)
+    # plt.title('Confusion matrix')
+    # plt.colorbar()
+    # plt.ylabel('True label')
+    # plt.xlabel('Predicted label')
+    # plt.show()
 
 
 if __name__ == "__main__":

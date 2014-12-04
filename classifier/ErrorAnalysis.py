@@ -75,13 +75,22 @@ def precision_recall_f1(l_true_labels, l_predicted_labels, event_label):
         elif l_true_labels[i] == event_label and l_predicted_labels[i] != event_label:
             d_confusion_matrix['fn'] += 1
 
-    print d_confusion_matrix
 
-    precision = d_confusion_matrix['tp'] / (d_confusion_matrix['tp']+d_confusion_matrix['fp'])
-    recall = d_confusion_matrix['tp'] / (d_confusion_matrix['tp']+d_confusion_matrix['fn'])
-    f1_score = (2 * precision * recall) / (precision + recall)
-    
+    try:
+        precision = d_confusion_matrix['tp'] / float(d_confusion_matrix['tp']+d_confusion_matrix['fp'])
+    except:
+        precision = 0
+    try:
+        recall = d_confusion_matrix['tp'] / float(d_confusion_matrix['tp']+d_confusion_matrix['fn'])
+    except:
+        recall = 0
+    try:
+        f1_score = (2 * precision * recall) / float(precision + recall)
+    except:
+        f1_score = 0
+
     print '------------------'
+    print d_confusion_matrix
     print 'For event label: ', event_label
     print 'Precision is: ', precision
     print 'Recall is: ', recall
