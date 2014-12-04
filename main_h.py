@@ -1,13 +1,11 @@
-import numpy as np
-from scipy import *
 from Classes.Sentences import Paragraphs, Sentences
 from Features.example_features import *
 from functools import partial
 from classifier.ErrorAnalysis import precision_recall_f1
 from classifier.loglinear.Loglinear import LoglinearModel
-import time
 from utils.Utils import *
-import pickle
+import cloud.serialization.cloudpickle as cp
+
 
 
 def main():
@@ -29,7 +27,7 @@ def main():
     print 'Preprocessing data'
     print '------------------\n'
 
-    used_fraction = 0.15
+    used_fraction = 0.015
     train_fraction = 0.8
     none_fraction = 0.1
 
@@ -74,7 +72,7 @@ def main():
     print '-------------\n'
 
     alpha = 0.2
-    max_iterations = 10
+    max_iterations = 1
 
     print 'Alpha = ', alpha
     print 'Max iterations = ', max_iterations
@@ -142,7 +140,9 @@ def main():
     analysis_end = time.time()
     print 'Analysis time:', analysis_end - predict_end, 's'
     ####################################################################################################################
-    # pickle.dump(classifier, open('classifier.p', 'rb'))
+
+    cp.dump(classifier, open('classifier.p', 'wb'))
+    # classifier = cp.loads(open('classifier.p', 'rb').read())
 
 
 if __name__ == "__main__":
