@@ -75,7 +75,6 @@ def precision_recall_f1(l_true_labels, l_predicted_labels, event_label):
         elif l_true_labels[i] == event_label and l_predicted_labels[i] != event_label:
             d_confusion_matrix['fn'] += 1
 
-
     try:
         precision = d_confusion_matrix['tp'] / float(d_confusion_matrix['tp']+d_confusion_matrix['fp'])
     except:
@@ -96,4 +95,31 @@ def precision_recall_f1(l_true_labels, l_predicted_labels, event_label):
     print 'Recall is: ', recall
     print 'F1 score is: ', f1_score
     print '------------------'
-        
+
+    return d_confusion_matrix
+
+
+# def precision_recall_f1_all(l_true_labels, l_predicted_labels, class_dict):
+#     if (len(l_true_labels) != len(l_predicted_labels)):
+#         raise Exception('Input dimensions don\'t match')
+#
+#     confusion_matrix = [[0 for x in range(10)] for x in range(10)]
+#     relevant_labels = class_dict.keys()
+#     relevant_labels.pop('None')
+#     for event_label in relevant_labels:
+#         for i in range(0, len(l_true_labels)):
+#             # skip tp 'None-s'
+#             if l_true_labels[i] == 'None' and l_predicted_labels[i] == 'None':
+#                 continue
+#             # true positives
+#             if l_true_labels[i] == event_label and l_predicted_labels[i] == event_label:
+#                 confusion_matrix[class_dict[event_label]][class_dict[event_label]] += 1
+#             # true negatives
+#             elif l_true_labels[i] != event_label and l_predicted_labels[i] != event_label:
+#                 confusion_matrix[class_dict[l_true_labels[i]]][class_dict[event_label]] += 1
+#             # false positives
+#             elif l_true_labels[i] != event_label and l_predicted_labels[i] == event_label:
+#                 d_confusion_matrix['fp'] += 1
+#             # false negatives
+#             elif l_true_labels[i] == event_label and l_predicted_labels[i] != event_label:
+#                 d_confusion_matrix['fn'] += 1
