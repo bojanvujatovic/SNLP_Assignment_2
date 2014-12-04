@@ -1,7 +1,7 @@
 from Classes.Sentences import Paragraphs, Sentences
 from Features.example_features import *
 from functools import partial
-from classifier.ErrorAnalysis import precision_recall_f1
+from classifier.ErrorAnalysis import *
 from classifier.loglinear.Loglinear import LoglinearModel
 from utils.Utils import *
 import cloud.serialization.cloudpickle as cp
@@ -123,15 +123,36 @@ def main():
         print 'Analyzing label: ', label
         precision_recall_f1(true_labels, predictions, label)
 
-    from sklearn.metrics import confusion_matrix
+    # from sklearn.metrics import confusion_matrix
+    import sklearn.metrics as sk
 
     y_test = map(lambda t: t.event_candidate, all_test_tokens)
     y_pred = predictions
 
     # Compute confusion matrix
-    cm = confusion_matrix(y_test, y_pred)
+    # cm = sk.confusion_matrix(y_test, y_pred)
+    #
+    # print(cm)
 
-    print(cm)
+    cm2 = confusion_matrix(class_dict, y_test, y_pred)
+
+
+    print cm2
+
+    for i in range(len(class_dict)):
+        print 'recall of', i, ':', label_recall(cm2, i)
+        print 'precision of', i, ':', label_precision(cm2, i)
+        print 'f1 of', i, ':', label_f1(cm2, i)
+        
+    print '\n'
+    print 'precision micro:', precision_micro(cm2)
+    print 'recall micro:', recall_micro(cm2)
+    print 'f1 micro:', f1_micro(cm2)
+    print '\n'
+    print 'precision macro:', precision_macro(cm2)
+    print 'recall macro:', recall_macro(cm2)
+    print 'f1 macro:', f1_macro(cm2)
+    
 
     # Show confusion matrix in a separate window
     # import matplotlib.pyplot as plt
