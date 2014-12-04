@@ -55,6 +55,10 @@
 
 
 # Gives precision, recall and f1 score for the requested event
+from numpy import mat, zeros
+from numpy.core.umath import isnan
+
+
 def precision_recall_f1(l_true_labels, l_predicted_labels, event_label):
     if (len(l_true_labels) != len(l_predicted_labels)):
         raise Exception('Input dimensions don\'t match')
@@ -123,3 +127,109 @@ def precision_recall_f1(l_true_labels, l_predicted_labels, event_label):
 #             # false negatives
 #             elif l_true_labels[i] == event_label and l_predicted_labels[i] != event_label:
 #                 d_confusion_matrix['fn'] += 1
+
+def confusion_matrix(class_dict, y_test, y_pred):
+    n_classes = len(class_dict)
+    # n_classes = len(set(y_test))
+    confusion = mat(zeros((n_classes, n_classes)))
+
+    for i in range(0, len(y_pred)):
+        confusion[class_dict[y_pred[i]], class_dict[y_test[i]]] += 1
+
+    return confusion
+
+
+def recall_micro(confusion):
+    n = confusion.shape[0]
+    num = 0
+    den = 0
+    for i in range(0, n):
+        num += confusion[i, i]
+        den += confusion[i, i]
+        den += confusion[range(i) + range(i+1, n), range(i) + range(i+1, n)].sum()
+
+    try:
+        recall = float(num) / den
+    except:
+        recall = 0.0
+
+    return recall
+
+
+def precision_micro(confusion):
+    try:
+        precision = float(confusion.trace()) / confusion.sum()
+    except:
+        precision = 0.0
+
+    return precision
+
+
+def f1_micro(confusion):
+    p = precision_micro(confusion)
+    r = recall_micro(confusion)
+    try:
+        f1 = 2.0 * p * r / (p + r)
+    except:
+        f1 = 0.0
+
+    return f1
+
+
+def label_precision(confusion, label):
+    try:
+        precision = float(confusion[label, label]) / confusion[label, :].sum()
+    except:
+        precision = 0.0
+
+    return precision if not isnan(precision) else 0.0
+
+
+def label_recall(confusion, label):
+    n = confusion.shape[0]
+    num = float(confusion[label, label])
+    den = confusion[label, label] + confusion[range(label) + range(label+1, n), range(label) + range(label+1, n)].sum()
+    try:
+        recall = num / den
+    except:
+        recall = 0.0
+
+    return recall
+
+
+def label_f1(confusion, label):
+    p = label_precision(confusion, label)
+    r = label_recall(confusion, label)
+    try:
+        f1 = 2.0 * p * r / (p + r)
+    except:
+        f1 = 0.0
+
+    return f1
+
+
+def precision_macro(confusion):
+    n = confusion.shape[0]
+    avg = 0.0
+    for i in range(n):
+        avg += label_precision(confusion, i)
+    return avg / n
+
+
+def recall_macro(confusion):
+    n = confusion.shape[0]
+    avg = 0.0
+    for i in range(n):
+        avg += label_recall(confusion, i)
+    return avg / n
+
+
+def f1_macro(confusion):
+    p = precision_macro(confusion)
+    r = recall_macro(confusion)
+    try:
+        f1 = 2.0 * p * r / (p + r)
+    except:
+        f1 = 0.0
+
+    return f1
