@@ -180,3 +180,40 @@ class word_stem_class_feature(feature):
         word_id  = self.stem_dict.get(token.word, self.stem_dict["<<<<<UNK>>>>>"])
         
         return self.counts[class_id][word_id]
+    
+class pos_class_feature(feature):
+    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations):
+        super(pos_class_feature, self).__init__(class_dict, 1)
+        self.pos_tags = ['NN', 'NNP', 'NNS', 'NNPS',
+                'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ',
+                'JJ', 'JJR', 'JJS']
+            
+    def update(self, token, event_candidate):
+        class_id = self.class_dict[event_candidate]
+        
+        if token.pos in self.pos_tags:
+            self.counts[class_id][0] += 1
+    
+    def prob(self, token, c):
+        class_id = self.class_dict[c]
+        if token.pos in self.pos_tags:
+            return self.counts[class_id][0]
+        else:
+            return 1 - self.counts[class_id][0]
+        
+class token_is_after_dash_feature(feature):
+    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations):
+        super(pos_class_feature, self).__init__(class_dict, 1)
+            
+    def update(self, token, event_candidate):
+        class_id = self.class_dict[event_candidate]
+        
+        if token.word[0] == "-":
+            self.counts[class_id][0] += 1
+    
+    def prob(self, token, c):
+        class_id = self.class_dict[c]
+        if token.word[0] == "-":
+            return self.counts[class_id][0]
+        else:
+            return 1 - self.counts[class_id][0]
