@@ -10,57 +10,50 @@ from utils.Utils import *
 import pickle
 
 
-def phi(word, c):
-    print 'phi(', word, c, ')'
-    x = np.mat(np.zeros((2, 1)))
-    if word[0] == 'increase' and c == 'regulation':
-        print 'case 1'
-        x[0, 0] = 1
-    elif word[0] == 'expression' and c == 'Gene_expression':
-        print 'case 2'
-        x[1, 0] = 1
-    return x
-
-
 def main():
-    ####################################################################################################################
-    ### TRAIN
-    ####################################################################################################################
-
     start = time.time()
-
-    fraction_of_data = 0.1
+    ### READ ###########################################################################################################
+    print '\n------------'
+    print 'Reading data'
+    print '------------\n'
 
     all_train_sentences = Paragraphs("Dataset/Train/").all_sentences()
 
     ###
     read_end = time.time()
-    print 'reading time:', read_end - start
-    ###
+    print 'Reading time:', read_end - start, 's'
+    ####################################################################################################################
 
-    (train_sentences, non_train_sentences) = all_train_sentences.split_randomly(fraction_of_data)
-    (test_sentences, shit_sentences) = all_train_sentences.split_randomly(fraction_of_data)
+    ### PREPROCESS #####################################################################################################
+    print '\n------------------'
+    print 'Preprocessing data'
+    print '------------------\n'
 
-    print len(train_sentences.sentences)
+    used_fraction = 0.15
+    train_fraction = 0.8
+    none_fraction = 0.1
 
+    print 'Fraction of data used:', used_fraction
+    print 'Fraction of data for training:', train_fraction
+    print 'Fraction of None-labelled samples used:', none_fraction
 
-    all_tokens = train_sentences.tokens()
-    subsampled_tokens = subsample_none(all_tokens, 0.07)
-    print (len(all_tokens), len(subsampled_tokens))
+    (used_sentences, _) = all_train_sentences.split_randomly(used_fraction)
+    (train_sentences, test_sentences) = used_sentences.split_randomly(train_fraction)
 
+    all_train_tokens = train_sentences.tokens()
+    subsampled_tokens = subsample_none(all_train_tokens, none_fraction)
+
+    print 'Number of training tokens:', len(subsampled_tokens)
 
     class_dict = get_class_dict(subsampled_tokens)
     stem_dict = get_stem_dict(subsampled_tokens)
     word_dict = get_word_dict(subsampled_tokens)
     ngram_dict = get_ngram_dict(subsampled_tokens, 2)
 
+    ## TODO: Implement get_trigger_dict
     s = Sentences("", [{"tokens": []}])
     s.sentences[0].tokens += subsampled_tokens
     trigger_dict = s.get_trigger_dict()
-
-    # for t in subsampled_tokens:
-    # class_dict[t.event_candidate] += 1
-    # print class_dict
 
     feature_strings = ["word_class_template_feature",
                        "capital_letter_feature",
@@ -68,41 +61,53 @@ def main():
                        "character_ngram_feature"]
     phi = partial(set_of_features, stem_dict, word_dict, class_dict, trigger_dict, 2, ngram_dict, feature_strings)
 
+    print 'Used features:', feature_strings
+
     ###
     preprocess_end = time.time()
-    print 'preprocessing time:', preprocess_end - read_end
-    ###
+    print 'Preprocessing time:', preprocess_end - read_end, 's'
+    ####################################################################################################################
 
-    classifier = LoglinearModel(lambda t: t.event_candidate, phi, class_dict.keys(), 0.2, 10).train(subsampled_tokens)
+    ### TRAIN ##########################################################################################################
+    print '\n-------------'
+    print 'Training data'
+    print '-------------\n'
+
+    alpha = 0.2
+    max_iterations = 10
+
+    print 'Alpha = ', alpha
+    print 'Max iterations = ', max_iterations
+
+    classifier = LoglinearModel(lambda t: t.event_candidate, phi, class_dict.keys(), alpha, max_iterations)\
+        .train(subsampled_tokens)
 
     ###
     train_end = time.time()
-    print 'training time:', train_end - read_end
-    ###
-
-    ####################################################################################################################
-    ### TEST
+    print 'Training time:', train_end - read_end, 's'
     ####################################################################################################################
 
+    #### TEST ###########################################################################################################
+    print '\n-------'
+    print 'Testing'
+    print '-------\n'
 
-    predictions = classifier.predict_all(subsampled_tokens)
+    all_test_tokens = test_sentences.tokens()
+    subsampled_test_tokens = all_test_tokens
+
+    print 'Number of test tokens:', len(subsampled_test_tokens)
+
+    predictions = classifier.predict_all(subsampled_test_tokens)
 
     ###
     predict_end = time.time()
-    print 'predict time:', predict_end - train_end
-    ###
+    print 'Predict time:', predict_end - train_end, 's'
+    ####################################################################################################################
 
-    print predictions
-
-    all_test_tokens = []
-    for sentence in test_sentences.sentences:
-        all_test_tokens.extend(sentence.tokens)
-
-    all_test_tokens = subsample_none(all_test_tokens, 0)
-
-    predictions = classifier.predict_all(all_test_tokens)
-    print predictions
-    print len(predictions)
+    ### ERROR ANALYSIS #################################################################################################
+    print '\n-----------------'
+    print 'Analysing results'
+    print '-----------------\n'
 
     true_labels = []
     for token in all_test_tokens:
@@ -115,7 +120,6 @@ def main():
         precision_recall_f1(true_labels, predictions, label)
 
     from sklearn.metrics import confusion_matrix
-    import matplotlib.pyplot as plt
 
     y_test = map(lambda t: t.event_candidate, all_test_tokens)
     y_pred = predictions
@@ -126,13 +130,18 @@ def main():
     print(cm)
 
     # Show confusion matrix in a separate window
-    plt.matshow(cm)
-    plt.title('Confusion matrix')
-    plt.colorbar()
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
-    plt.show()
+    # import matplotlib.pyplot as plt
+    # plt.matshow(cm)
+    # plt.title('Confusion matrix')
+    # plt.colorbar()
+    # plt.ylabel('True label')
+    # plt.xlabel('Predicted label')
+    # plt.show()
 
+    ###
+    analysis_end = time.time()
+    print 'Analysis time:', analysis_end - predict_end, 's'
+    ####################################################################################################################
     # pickle.dump(classifier, open('classifier.p', 'rb'))
 
 
