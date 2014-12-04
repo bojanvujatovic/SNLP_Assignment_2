@@ -10,6 +10,7 @@ from Classes.Sentences import *
 from Features.example_features import *
 from functools import partial
 from classifier.naivebayes.naivebayes import *
+from utils.Utils import *
 
 def main():
     """Main function of the project.
@@ -21,7 +22,7 @@ def main():
     2. 
     3.
     """
-    all_train_sentences = Paragraphs("Dataset/Train/").all_sentences()
+    all_train_sentences = Paragraphs("Dataset/Train_small/").all_sentences()
     (train_sentences, hand_out_sentences) = all_train_sentences.split_randomly(0.8)
     
     #test_sentences = Paragraphs("Dataset/Test/").all_sentences()
@@ -29,18 +30,19 @@ def main():
     word_dict = train_sentences.get_word_dict()
     class_dict = train_sentences.get_class_dict()
     trigger_dict = train_sentences.get_trigger_dict()
+    stem_dict = get_stem_dict(train_sentences.tokens())
     
     #for word in trigger_dict:
     #    print word
     
-    print len(word_dict)
-    print len(trigger_dict)
+    nb = NaiveBayes(stem_dict, word_dict, class_dict, trigger_dict, 2, train_sentences.get_ngram_dict(2))
     
-    phi = partial(whole_set_of_features, word_dict, class_dict, trigger_dict, 2, train_sentences.get_ngram_dict(2))
+    feature_strings = ["capital_letter_feature", "class_feature"]
+    trained_nb = nb.train(train_sentences.tokens(), feature_strings)
     
-    nb = NaiveBayes(phi, class_dict)
-    
-    trained_nb = nb.train(train_sentences.tokens())
+    for s in hand_out_sentences.sentences:
+        for t in s.tokens:
+            print t.event_candidate, trained_nb.predict(t)
     
 if __name__ == "__main__":
     main()
