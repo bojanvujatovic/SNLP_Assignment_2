@@ -33,7 +33,6 @@ class LoglinearModel(ClassifierModel):
                     changed = True
             if not changed:
                 break
-        print weights
         return TrainedLoglinearModel(weights, self)
 
 
