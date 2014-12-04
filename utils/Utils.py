@@ -32,6 +32,7 @@ def get_char_ngram_dict(tokens, n):
     ngram_dict['<<UNK>>'] = len(ngram_dict)
     return ngram_dict
 
+
 def get_ngram_dict(tokens, n):
     l0 = [str(map(lambda t: t.word, tokens[i: i + n])) for i in range(len(tokens) - n + 1)]
     print l0
