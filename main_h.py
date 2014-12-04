@@ -27,7 +27,7 @@ def main():
     print 'Preprocessing data'
     print '------------------\n'
 
-    used_fraction = 0.015
+    used_fraction = 0.15
     train_fraction = 0.8
     none_fraction = 0.1
 
@@ -46,18 +46,24 @@ def main():
     class_dict = get_class_dict(subsampled_tokens)
     stem_dict = get_stem_dict(subsampled_tokens)
     word_dict = get_word_dict(subsampled_tokens)
-    ngram_dict = get_ngram_dict(subsampled_tokens, 2)
+    ngram_order = 2
+    ngram_dict = get_ngram_dict(subsampled_tokens, ngram_order)
+    trigger_dict = get_trigger_dict(subsampled_tokens)
 
-    ## TODO: Implement get_trigger_dict
-    s = Sentences("", [{"tokens": []}])
-    s.sentences[0].tokens += subsampled_tokens
-    trigger_dict = s.get_trigger_dict()
-
-    feature_strings = ["word_class_template_feature",
-                       "capital_letter_feature",
-                       "number_in_token_feature",
-                       "character_ngram_feature"]
-    phi = partial(set_of_features, stem_dict, word_dict, class_dict, trigger_dict, 2, ngram_dict, feature_strings)
+    # feature_strings = ["word_class_template_feature",
+    #                    "capital_letter_feature",
+    #                    "number_in_token_feature",
+    #                    "character_ngram_feature"]
+    feature_strings = ['word_template_feature',
+                       'word_class_template_feature',
+                       'capital_letter_feature',
+                       'token_in_trigger_dict_feature',
+                       'number_in_token_feature',
+                       'token_in_protein_feature',
+                       'token_is_after_dash_feature',
+                       'pos_class_feature',
+                       'character_ngram_feature']
+    phi = partial(set_of_features, stem_dict, word_dict, class_dict, trigger_dict, ngram_order, ngram_dict, feature_strings)
 
     print 'Used features:', feature_strings
 
@@ -72,10 +78,10 @@ def main():
     print '-------------\n'
 
     alpha = 0.2
-    max_iterations = 1
+    max_iterations = 10
 
-    print 'Alpha = ', alpha
-    print 'Max iterations = ', max_iterations
+    print 'Alpha =', alpha
+    print 'Max iterations =', max_iterations
 
     classifier = LoglinearModel(lambda t: t.event_candidate, phi, class_dict.keys(), alpha, max_iterations)\
         .train(subsampled_tokens)
@@ -141,7 +147,7 @@ def main():
     print 'Analysis time:', analysis_end - predict_end, 's'
     ####################################################################################################################
 
-    cp.dump(classifier, open('classifier.p', 'wb'))
+    cp.dump(classifier, open('classifier_' + time.strftime("%Y%m%d-%H%M%S") + '.p', 'wb'))
     # classifier = cp.loads(open('classifier.p', 'rb').read())
 
 
