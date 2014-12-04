@@ -159,3 +159,24 @@ class number_in_token_class_feature(feature):
             return self.counts[class_id][0]
         else:
             return 1 - self.counts[class_id][0]
+        
+class word_stem_class_feature(feature):
+    def __init__(self, stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations):
+        stem_dict["<<<<<UNK>>>>>"] = len(stem_dict)
+        
+        super(word_stem_class_feature, self).__init__(class_dict, len(stem_dict))
+        self.stem_dict = stem_dict
+            
+    def update(self, token, event_candidate):
+        class_id = self.class_dict[event_candidate]
+        word_id  = self.stem_dict[token.stem]
+        
+        self.counts[class_id][word_id] += 1
+        if self.counts[class_id][word_id] == 1:
+            self.counts[class_id][self.stem_dict["<<<<<UNK>>>>>"]] += 1
+    
+    def prob(self, token, c):
+        class_id = self.class_dict[c]
+        word_id  = self.stem_dict.get(token.word, self.stem_dict["<<<<<UNK>>>>>"])
+        
+        return self.counts[class_id][word_id]
