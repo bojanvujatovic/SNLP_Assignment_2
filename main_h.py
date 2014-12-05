@@ -27,7 +27,7 @@ def main():
     print 'Preprocessing data'
     print '------------------\n'
 
-    used_fraction = 0.5
+    used_fraction = 0.005
     train_fraction = 0.8
     none_fraction = 0.1
 
@@ -78,7 +78,7 @@ def main():
     print '-------------\n'
 
     alpha = 0.2
-    max_iterations = 10
+    max_iterations = 1
 
     print 'Alpha =', alpha
     print 'Max iterations =', max_iterations
@@ -118,7 +118,7 @@ def main():
         true_labels.append(token.event_candidate)
 
     test_keys = class_dict.keys()
-    test_keys.pop(0)
+    # test_keys.pop(0)
     for label in test_keys:
         print 'Analyzing label: ', label
         precision_recall_f1(true_labels, predictions, label)
@@ -136,8 +136,9 @@ def main():
 
     cm2 = confusion_matrix(class_dict, y_test, y_pred)
 
-
     print cm2
+
+    none_index = class_dict['None']
 
     for i in range(len(class_dict)):
         print 'recall of', i, ':', label_recall(cm2, i)
@@ -145,13 +146,13 @@ def main():
         print 'f1 of', i, ':', label_f1(cm2, i)
         
     print '\n'
-    print 'precision micro:', precision_micro(cm2)
-    print 'recall micro:', recall_micro(cm2)
-    print 'f1 micro:', f1_micro(cm2)
+    print 'precision micro:', precision_micro(cm2, none_index)
+    print 'recall micro:', recall_micro(cm2, none_index)
+    print 'f1 micro:', f1_micro(cm2, none_index)
     print '\n'
-    print 'precision macro:', precision_macro(cm2)
-    print 'recall macro:', recall_macro(cm2)
-    print 'f1 macro:', f1_macro(cm2)
+    print 'precision macro:', precision_macro(cm2, none_index)
+    print 'recall macro:', recall_macro(cm2, none_index)
+    print 'f1 macro:', f1_macro(cm2, none_index)
     
 
     # Show confusion matrix in a separate window

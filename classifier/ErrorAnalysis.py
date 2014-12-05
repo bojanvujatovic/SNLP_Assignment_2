@@ -139,41 +139,40 @@ def confusion_matrix(class_dict, y_test, y_pred):
     return confusion
 
 
-def recall_micro(confusion):
+def recall_micro(confusion, none_index, exclude_none=True):
     n = confusion.shape[0]
-    num = 0
-    den = 0
-    for i in range(0, n):
-        num += confusion[i, i]
-        den += confusion[i, i]
-        den += confusion[range(i) + range(i+1, n), range(i) + range(i+1, n)].sum()
+    num = sum([confusion[i, i] for i in range(n) if i != none_index or not exclude_none])
+    den = sum([confusion[:, i].sum() for i in range(n) if i != none_index or not exclude_none])
 
     try:
         recall = float(num) / den
     except:
         recall = 0.0
 
-    return recall
+    return recall if not isnan(recall) else 0.0
 
 
-def precision_micro(confusion):
+def precision_micro(confusion, none_index, exclude_none=True):
+    n = confusion.shape[0]
+    num = sum([confusion[i, i] for i in range(n) if i != none_index or not exclude_none])
+    den = sum([confusion[i, :].sum() for i in range(n) if i != none_index or not exclude_none])
     try:
-        precision = float(confusion.trace()) / confusion.sum()
+        precision = float(num) / den
     except:
         precision = 0.0
 
-    return precision
+    return precision if not isnan(precision) else 0.0
 
 
-def f1_micro(confusion):
-    p = precision_micro(confusion)
-    r = recall_micro(confusion)
+def f1_micro(confusion, none_index, exclude_none=True):
+    p = precision_micro(confusion, none_index, exclude_none)
+    r = recall_micro(confusion, none_index, exclude_none)
     try:
         f1 = 2.0 * p * r / (p + r)
     except:
         f1 = 0.0
 
-    return f1
+    return f1 if not isnan(f1) else 0.0
 
 
 def label_precision(confusion, label):
@@ -186,15 +185,12 @@ def label_precision(confusion, label):
 
 
 def label_recall(confusion, label):
-    n = confusion.shape[0]
-    num = float(confusion[label, label])
-    den = confusion[label, label] + confusion[range(label) + range(label+1, n), range(label) + range(label+1, n)].sum()
     try:
-        recall = num / den
+        recall = float(confusion[label, label]) / confusion[:, label].sum()
     except:
         recall = 0.0
 
-    return recall
+    return recall if not isnan(recall) else 0.0
 
 
 def label_f1(confusion, label):
@@ -205,31 +201,25 @@ def label_f1(confusion, label):
     except:
         f1 = 0.0
 
-    return f1
+    return f1 if not isnan(f1) else 0.0
 
 
-def precision_macro(confusion):
+def precision_macro(confusion, none_index, exclude_none=True):
     n = confusion.shape[0]
-    avg = 0.0
-    for i in range(n):
-        avg += label_precision(confusion, i)
-    return avg / n
+    return sum([label_precision(confusion, i) for i in range(n) if i != none_index or not exclude_none]) / float(n)
 
 
-def recall_macro(confusion):
+def recall_macro(confusion, none_index, exclude_none=True):
     n = confusion.shape[0]
-    avg = 0.0
-    for i in range(n):
-        avg += label_recall(confusion, i)
-    return avg / n
+    return sum([label_recall(confusion, i) for i in range(n) if i != none_index or not exclude_none]) / float(n)
 
 
-def f1_macro(confusion):
-    p = precision_macro(confusion)
-    r = recall_macro(confusion)
+def f1_macro(confusion, none_index, exclude_none=True):
+    p = precision_macro(confusion, none_index, exclude_none)
+    r = recall_macro(confusion, none_index, exclude_none)
     try:
         f1 = 2.0 * p * r / (p + r)
     except:
         f1 = 0.0
 
-    return f1
+    return f1 if not isnan(f1) else 0.0
