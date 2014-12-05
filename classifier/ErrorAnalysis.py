@@ -7,7 +7,7 @@ Created on 2 Dec 2014
 
 
 # Gives precision, recall and f1 score for the requested event
-from numpy import mat, zeros
+from numpy import mat, zeros, seterr
 from numpy.core.umath import isnan
 
 
@@ -93,6 +93,7 @@ def precision_micro(confusion, none_index, exclude_none=True):
 
 
 def f1_micro(confusion, none_index, exclude_none=True):
+    seterr(all='ignore')
     p = precision_micro(confusion, none_index, exclude_none)
     r = recall_micro(confusion, none_index, exclude_none)
     try:
@@ -122,6 +123,7 @@ def label_recall(confusion, label):
 
 
 def label_f1(confusion, label):
+    seterr(all='ignore')
     p = label_precision(confusion, label)
     r = label_recall(confusion, label)
     try:

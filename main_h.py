@@ -5,8 +5,7 @@ from classifier.ErrorAnalysis import *
 from classifier.loglinear.Loglinear import LoglinearModel
 from utils.Utils import *
 import cloud.serialization.cloudpickle as cp
-
-
+from pprint import pprint
 
 def main():
     start = time.time()
@@ -15,7 +14,7 @@ def main():
     print 'Reading data'
     print '------------\n'
 
-    all_train_sentences = Paragraphs("Dataset/Train/").all_sentences()
+    all_train_sentences = Paragraphs("Dataset/Train_small/").all_sentences()
 
     ###
     read_end = time.time()
@@ -27,7 +26,7 @@ def main():
     print 'Preprocessing data'
     print '------------------\n'
 
-    used_fraction = 0.15
+    used_fraction = 1
     train_fraction = 0.8
     none_fraction = 0.05
 
@@ -120,43 +119,43 @@ def main():
         true_labels.append(token.event_candidate)
 
     test_keys = class_dict.keys()
-    test_keys.pop(0)
+    # test_keys.pop(0)
     for label in test_keys:
         print 'Analyzing label: ', label
         precision_recall_f1(true_labels, predictions, label)
 
-    # # from sklearn.metrics import confusion_matrix
-    # import sklearn.metrics as sk
-    #
-    # y_test = map(lambda t: t.event_candidate, all_test_tokens)
-    # y_pred = predictions
+    # from sklearn.metrics import confusion_matrix
+    import sklearn.metrics as sk
 
-    # Compute confusion matrix
-    # cm = sk.confusion_matrix(y_test, y_pred)
-    #
-    # print(cm)
+    y_test = map(lambda t: t.event_candidate, all_test_tokens)
+    y_pred = predictions
 
-    # cm2 = confusion_matrix(class_dict, y_test, y_pred)
+    # Compute sklearn confusion matrix
+    cm = sk.confusion_matrix(y_test, y_pred)
+    print(cm)
 
-    #
-    # print cm2
-    #
-    # none_index = class_dict['None']
-    #
-    # for i in range(len(class_dict)):
-    #     print 'recall of', i, ':', label_recall(cm2, i)
-    #     print 'precision of', i, ':', label_precision(cm2, i)
-    #     print 'f1 of', i, ':', label_f1(cm2, i)
-    #
-    # print '\n'
-    # print 'precision micro:', precision_micro(cm2, none_index)
-    # print 'recall micro:', recall_micro(cm2, none_index)
-    # print 'f1 micro:', f1_micro(cm2, none_index)
-    # print '\n'
-    # print 'precision macro:', precision_macro(cm2, none_index)
-    # print 'recall macro:', recall_macro(cm2, none_index)
-    # print 'f1 macro:', f1_macro(cm2, none_index)
-    #
+    # Computer our confusion matrix
+    cm2 = confusion_matrix(class_dict, y_test, y_pred)
+    pprint(cm2)
+
+    none_index = class_dict['None']
+    classes = class_dict.keys()
+
+    for i in range(len(class_dict)):
+        print '\nCLASS: ', classes[i]
+        print 'Recall: ', label_recall(cm2, i)
+        print 'Precision: ', label_precision(cm2, i)
+        print 'F1: ', label_f1(cm2, i)
+
+    print '\n'
+    print 'Precision micro:', precision_micro(cm2, none_index)
+    print 'Recall micro:', recall_micro(cm2, none_index)
+    print 'F1 micro:', f1_micro(cm2, none_index)
+    print '\n'
+    print 'Precision macro:', precision_macro(cm2, none_index)
+    print 'Recall macro:', recall_macro(cm2, none_index)
+    print 'F1 macro:', f1_macro(cm2, none_index)
+
 
     # Show confusion matrix in a separate window
     # import matplotlib.pyplot as plt
@@ -168,11 +167,11 @@ def main():
     # plt.show()
 
     ###
-    # analysis_end = time.time()
-    # print 'Analysis time:', analysis_end - predict_end, 's'
+    analysis_end = time.time()
+    print '\nAnalysis time:', analysis_end - predict_end, 's'
     # ####################################################################################################################
     #
-    # cp.dump(classifier, open('classifier_' + time.strftime("%Y%m%d-%H%M%S") + '.p', 'wb'))
+    cp.dump(classifier, open('classifier_' + time.strftime("%Y%m%d-%H%M%S") + '.p', 'wb'))
     # classifier = cp.loads(open('classifier.p', 'rb').read())
 
 
