@@ -5,8 +5,7 @@ from scipy.sparse import csr_matrix, vstack
 from scipy import array
 
 
-def word_template_feature(stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations, token,
-                          event_candidate):
+def word_template_feature(stem_dict, word_dict, class_dict, trigger_dict, n, char_ngram_combinations, ngram_combinations, token, event_candidate):
     n_words = len(word_dict)
 
     data = array([1])
@@ -20,8 +19,8 @@ def word_template_feature(stem_dict, word_dict, class_dict, trigger_dict, n, ngr
 
 
 # Word belongs to a class                      
-def word_class_template_feature(stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations, token,
-                                event_candidate):
+def word_class_template_feature(stem_dict, word_dict, class_dict, trigger_dict, n, char_ngram_combinations,
+                                ngram_combinations, token, event_candidate):
     n_words = len(word_dict)
     n_classes = len(class_dict)
 
@@ -37,8 +36,8 @@ def word_class_template_feature(stem_dict, word_dict, class_dict, trigger_dict, 
 
 
 # Token has a capital letter
-def capital_letter_feature(stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations, token,
-                           event_candidate):
+def capital_letter_feature(stem_dict, word_dict, class_dict, trigger_dict, n, char_ngram_combinations,
+                           ngram_combinations, token, event_candidate):
     n_classes = len(class_dict)
 
     if token.word[0].isupper():
@@ -52,8 +51,8 @@ def capital_letter_feature(stem_dict, word_dict, class_dict, trigger_dict, n, ng
 
 
 # Token is in the trigger dictionary
-def token_in_trigger_dict_feature(stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations, token,
-                                  event_candidate):
+def token_in_trigger_dict_feature(stem_dict, word_dict, class_dict, trigger_dict, n, char_ngram_combinations,
+                                  ngram_combinations, token, event_candidate):
     n_classes = len(class_dict)
 
     if token.word in trigger_dict:
@@ -67,8 +66,8 @@ def token_in_trigger_dict_feature(stem_dict, word_dict, class_dict, trigger_dict
 
 
 # Token has a number
-def number_in_token_feature(stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations, token,
-                            event_candidate):
+def number_in_token_feature(stem_dict, word_dict, class_dict, trigger_dict, n, char_ngram_combinations,
+                            ngram_combinations, token, event_candidate):
     n_classes = len(class_dict)
 
     if any([char.isdigit() for char in token.word]):
@@ -82,8 +81,8 @@ def number_in_token_feature(stem_dict, word_dict, class_dict, trigger_dict, n, n
 
 
 # Token is in a protein
-def token_in_protein_feature(stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations, token,
-                             event_candidate):
+def token_in_protein_feature(stem_dict, word_dict, class_dict, trigger_dict, n, char_ngram_combinations,
+                             ngram_combinations, token, event_candidate):
     n_classes = len(class_dict)
 
     if ("Protein" or "protein") in token.mentions:
@@ -97,8 +96,8 @@ def token_in_protein_feature(stem_dict, word_dict, class_dict, trigger_dict, n, 
 
 
 # Token is after "-"
-def token_is_after_dash_feature(stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations, token,
-                                event_candidate):
+def token_is_after_dash_feature(stem_dict, word_dict, class_dict, trigger_dict, n, char_ngram_combinations,
+                                ngram_combinations, token, event_candidate):
     n_classes = len(class_dict)
 
     if token.word[0] == "-":
@@ -112,7 +111,8 @@ def token_is_after_dash_feature(stem_dict, word_dict, class_dict, trigger_dict, 
 
 
 # POS tags combined with class; events are usually nouns, verbs or adjectives
-def pos_class_feature(stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations, token, event_candidate):
+def pos_class_feature(stem_dict, word_dict, class_dict, trigger_dict, n, char_ngram_combinations,
+                      ngram_combinations, token, event_candidate):
     pos_tags = ['NN', 'NNP', 'NNS', 'NNPS',
                 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ',
                 'JJ', 'JJR', 'JJS']
@@ -131,10 +131,10 @@ def pos_class_feature(stem_dict, word_dict, class_dict, trigger_dict, n, ngram_c
 
 
 # Ngrams of characters
-def character_ngram_feature(stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations, token,
-                            event_candidate):
+def character_ngram_feature(stem_dict, word_dict, class_dict, trigger_dict, n, char_ngram_combinations,
+                            ngram_combinations, token, event_candidate):
     n_classes = len(class_dict)
-    n_grams = len(ngram_combinations)
+    n_grams = len(char_ngram_combinations)
     ngrams = [token.word[i:i + n] for i in range(len(token.word) - n + 1)]
 
     data = array([1] * len(ngrams))
@@ -142,9 +142,9 @@ def character_ngram_feature(stem_dict, word_dict, class_dict, trigger_dict, n, n
     ngram_indices = []
     for ngram in ngrams:
         try:
-            ngram_indices.append(ngram_combinations[ngram])
+            ngram_indices.append(char_ngram_combinations[ngram])
         except:
-            ngram_indices.append(ngram_combinations['<<UNK>>'])
+            ngram_indices.append(char_ngram_combinations['<<UNK>>'])
 
     i = array([index * n_classes + class_dict[event_candidate] for index in ngram_indices])
     j = array([0] * len(ngrams))
@@ -153,11 +153,8 @@ def character_ngram_feature(stem_dict, word_dict, class_dict, trigger_dict, n, n
     return csr_matrix((data, (i, j)), shape=(n_grams * n_classes, 1))
 
 
-
-
-
-
-def word_stem_feature(stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations, token, event_candidate):
+def word_stem_feature(stem_dict, word_dict, class_dict, trigger_dict, n, char_ngram_combinations,
+                      ngram_combinations, token, event_candidate):
     n_classes = len(stem_dict)
 
     data = array([1])
@@ -167,27 +164,50 @@ def word_stem_feature(stem_dict, word_dict, class_dict, trigger_dict, n, ngram_c
     return csr_matrix((data, (i, j)), shape=(n_classes, 1))
 
 
-def whole_set_of_features(stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations, token,
-                          event_candidate):
-    return vstack([word_template_feature(word_dict, token),
-                   word_class_template_feature(word_dict, class_dict, token, event_candidate),
-                   # capital_letter_feature(class_dict, token, event_candidate),
-                   # token_in_trigger_dict_feature(class_dict, trigger_dict, token, event_candidate),
-                   # number_in_token_feature(class_dict, token, event_candidate),
-                   # token_in_protein_feature(class_dict, token, event_candidate),
-                   # token_is_after_dash_feature(class_dict, token, event_candidate),
-                   # pos_class_feature(class_dict, token, event_candidate),
-                   # character_ngram_feature(n, ngram_combinations, class_dict, token, event_candidate)
-    ])
+def ngram_features(stem_dict, word_dict, class_dict, trigger_dict, n, char_ngram_combinations,
+                   ngram_combinations, token, event_candidate):
+    n_classes = len(class_dict)
+    n_ngrams = len(ngram_combinations)
+
+    if token.index == 0:
+        ngram = ['<<START>>', str(token.word)]
+    elif (token.tokens_in_sentence[-1].word == token.word) and \
+         (len(token.tokens_in_sentence)-1 == token.index):
+        ngram = [str(token.word), '<<END>>']
+    else:
+        ngram = [str(token.tokens_in_sentence[token.index-1].word), str(token.word)]
+
+    data = array([1])
+    try:
+        i = array([ngram_combinations[ngram] * n_classes + class_dict[event_candidate]])
+    except:
+        i = array([ngram_combinations['<<UNK>>'] * n_classes + class_dict[event_candidate]])
+    j = array([0])
+
+    return csr_matrix((data, (i, j)), shape=(n_ngrams * n_classes, 1))
 
 
-def set_of_features(stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations, feature_strings, token,
-                    event_candidate):
+# def whole_set_of_features(stem_dict, word_dict, class_dict, trigger_dict, n, char_ngram_combinations,
+#                           ngram_combinations, token, event_candidate):
+#     return vstack([word_template_feature(word_dict, token),
+#                    word_class_template_feature(word_dict, class_dict, token, event_candidate),
+#                    # capital_letter_feature(class_dict, token, event_candidate),
+#                    # token_in_trigger_dict_feature(class_dict, trigger_dict, token, event_candidate),
+#                    # number_in_token_feature(class_dict, token, event_candidate),
+#                    # token_in_protein_feature(class_dict, token, event_candidate),
+#                    # token_is_after_dash_feature(class_dict, token, event_candidate),
+#                    # pos_class_feature(class_dict, token, event_candidate),
+#                    # character_ngram_feature(n, char_ngram_combinations, class_dict, token, event_candidate)
+#     ])
+
+
+def set_of_features(stem_dict, word_dict, class_dict, trigger_dict, n, char_ngram_combinations, ngram_combinations,
+                    feature_strings, token, event_candidate):
     ret = []
 
     for feature_string in feature_strings:
         ret.append(
-            globals()[feature_string](stem_dict, word_dict, class_dict, trigger_dict, n, ngram_combinations, token,
-                                      event_candidate))
+            globals()[feature_string](stem_dict, word_dict, class_dict, trigger_dict, n, char_ngram_combinations,
+                                      ngram_combinations, token, event_candidate))
 
     return vstack(ret)
