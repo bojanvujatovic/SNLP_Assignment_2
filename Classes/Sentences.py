@@ -214,9 +214,10 @@ class Sentence(object):
                                 word_t = token_t.get("word", None)
                                 if index_t == arg_index:
                                     arg_word = word_t
+                                    arg_token = token_t
                                     break
 
-                            event_candidate_args.append((arg_word, arg.get("gold", None)))
+                            event_candidate_args.append((arg_token, arg.get("gold", None)))
 
             self.tokens.append(Token(self, word, token.get("stem", None), index,
                                      token.get("pos", None), token.get("begin", None), token.get("end", None),
@@ -248,7 +249,14 @@ class Token(object):
         # What we want to learn
         self.event_candidate = event_candidate
         self.event_candidate_args = event_candidate_args
-
+        
+        s = []
+        for e in self.event_candidate_args:
+            if e[1] != 'None':
+                s.append(e)
+                
+        if len(s) > 1:
+            print event_candidate_args
         # Derived features
         self.paragraph_text = sentence.paragraph_txt
         self.sentence_index = sentence_index

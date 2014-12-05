@@ -107,7 +107,8 @@ class class_feature(feature):
     
 class word_class_feature(feature):
     def __init__(self, stem_dict, word_dict, class_dict, trigger_dict):
-        word_dict["<<<<<UNK>>>>>"] = len(word_dict)
+        if not "<<<<<UNK>>>>>" in word_dict:
+            word_dict["<<<<<UNK>>>>>"] = len(word_dict)
         
         super(word_class_feature, self).__init__(class_dict, len(word_dict))
         self.word_dict = word_dict
@@ -164,7 +165,8 @@ class number_in_token_class_feature(feature):
         
 class word_stem_class_feature(feature):
     def __init__(self, stem_dict, word_dict, class_dict, trigger_dict):
-        stem_dict["<<<<<UNK>>>>>"] = len(stem_dict)
+        if not "<<<<<UNK>>>>>" in stem_dict:
+            stem_dict["<<<<<UNK>>>>>"] = len(stem_dict)
         
         super(word_stem_class_feature, self).__init__(class_dict, len(stem_dict))
         self.stem_dict = stem_dict
