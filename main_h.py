@@ -27,9 +27,9 @@ def main():
     print 'Preprocessing data'
     print '------------------\n'
 
-    used_fraction = 0.01
+    used_fraction = 0.15
     train_fraction = 0.8
-    none_fraction = 0.1
+    none_fraction = 0.05
 
     print 'Fraction of data used:', used_fraction
     print 'Fraction of data for training:', train_fraction
@@ -55,15 +55,15 @@ def main():
     #                    "capital_letter_feature",
     #                    "number_in_token_feature",
     #                    "character_ngram_feature"]
-    feature_strings = ['word_template_feature']
-                       #'word_class_template_feature',
-                       #'capital_letter_feature']
-                       #'token_in_trigger_dict_feature',
-                       #'number_in_token_feature',
-                       #'token_in_protein_feature',
-                       #'token_is_after_dash_feature',
-                       #'pos_class_feature',
-                       #'character_ngram_feature']
+    feature_strings = ['word_template_feature',
+                       'word_class_template_feature',
+                       'capital_letter_feature',
+                       'token_in_trigger_dict_feature',
+                       'number_in_token_feature',
+                       'token_in_protein_feature',
+                       'token_is_after_dash_feature',
+                       'pos_class_feature',
+                       'character_ngram_feature']
     phi = partial(set_of_features, stem_dict, word_dict, class_dict, trigger_dict, ngram_order, char_ngram_dict,
                   ngram_dict, feature_strings)
 
@@ -120,43 +120,43 @@ def main():
         true_labels.append(token.event_candidate)
 
     test_keys = class_dict.keys()
-    # test_keys.pop(0)
+    test_keys.pop(0)
     for label in test_keys:
         print 'Analyzing label: ', label
         precision_recall_f1(true_labels, predictions, label)
 
-    # from sklearn.metrics import confusion_matrix
-    import sklearn.metrics as sk
-
-    y_test = map(lambda t: t.event_candidate, all_test_tokens)
-    y_pred = predictions
+    # # from sklearn.metrics import confusion_matrix
+    # import sklearn.metrics as sk
+    #
+    # y_test = map(lambda t: t.event_candidate, all_test_tokens)
+    # y_pred = predictions
 
     # Compute confusion matrix
     # cm = sk.confusion_matrix(y_test, y_pred)
     #
     # print(cm)
 
-    cm2 = confusion_matrix(class_dict, y_test, y_pred)
+    # cm2 = confusion_matrix(class_dict, y_test, y_pred)
 
-
-    print cm2
-
-    none_index = class_dict['None']
-
-    for i in range(len(class_dict)):
-        print 'recall of', i, ':', label_recall(cm2, i)
-        print 'precision of', i, ':', label_precision(cm2, i)
-        print 'f1 of', i, ':', label_f1(cm2, i)
-        
-    print '\n'
-    print 'precision micro:', precision_micro(cm2, none_index)
-    print 'recall micro:', recall_micro(cm2, none_index)
-    print 'f1 micro:', f1_micro(cm2, none_index)
-    print '\n'
-    print 'precision macro:', precision_macro(cm2, none_index)
-    print 'recall macro:', recall_macro(cm2, none_index)
-    print 'f1 macro:', f1_macro(cm2, none_index)
-    
+    #
+    # print cm2
+    #
+    # none_index = class_dict['None']
+    #
+    # for i in range(len(class_dict)):
+    #     print 'recall of', i, ':', label_recall(cm2, i)
+    #     print 'precision of', i, ':', label_precision(cm2, i)
+    #     print 'f1 of', i, ':', label_f1(cm2, i)
+    #
+    # print '\n'
+    # print 'precision micro:', precision_micro(cm2, none_index)
+    # print 'recall micro:', recall_micro(cm2, none_index)
+    # print 'f1 micro:', f1_micro(cm2, none_index)
+    # print '\n'
+    # print 'precision macro:', precision_macro(cm2, none_index)
+    # print 'recall macro:', recall_macro(cm2, none_index)
+    # print 'f1 macro:', f1_macro(cm2, none_index)
+    #
 
     # Show confusion matrix in a separate window
     # import matplotlib.pyplot as plt
@@ -168,11 +168,11 @@ def main():
     # plt.show()
 
     ###
-    analysis_end = time.time()
-    print 'Analysis time:', analysis_end - predict_end, 's'
-    ####################################################################################################################
-
-    cp.dump(classifier, open('classifier_' + time.strftime("%Y%m%d-%H%M%S") + '.p', 'wb'))
+    # analysis_end = time.time()
+    # print 'Analysis time:', analysis_end - predict_end, 's'
+    # ####################################################################################################################
+    #
+    # cp.dump(classifier, open('classifier_' + time.strftime("%Y%m%d-%H%M%S") + '.p', 'wb'))
     # classifier = cp.loads(open('classifier.p', 'rb').read())
 
 
