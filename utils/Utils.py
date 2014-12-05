@@ -23,7 +23,9 @@ def get_class_dict(tokens):
 
 
 def get_stem_dict(tokens):
-    return dict(map(lambda p: (p[1], p[0]), enumerate(set([t.stem for t in tokens]))))
+    stem_dict = dict(map(lambda p: (p[1], p[0]), enumerate(set([t.stem for t in tokens]))))
+    stem_dict['<<UNK>>'] = len(stem_dict)
+    return stem_dict
 
 
 def get_char_ngram_dict(tokens, n):
@@ -35,7 +37,6 @@ def get_char_ngram_dict(tokens, n):
 
 def get_ngram_dict(tokens, n):
     l0 = [str(map(lambda t: t.word, tokens[i: i + n])) for i in range(len(tokens) - n + 1)]
-    print l0
     l = set(l0)
     ngram_dict = dict(map(lambda p: (p[1], p[0]), enumerate(l)))
     ngram_dict['<<UNK>>'] = len(ngram_dict)

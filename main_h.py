@@ -5,8 +5,7 @@ from classifier.ErrorAnalysis import *
 from classifier.loglinear.Loglinear import LoglinearModel
 from utils.Utils import *
 import cloud.serialization.cloudpickle as cp
-
-
+from pprint import pprint
 
 def main():
     start = time.time()
@@ -15,7 +14,7 @@ def main():
     print 'Reading data'
     print '------------\n'
 
-    all_train_sentences = Paragraphs("Dataset/Train/").all_sentences()
+    all_train_sentences = Paragraphs("Dataset/Train_small/").all_sentences()
 
     ###
     read_end = time.time()
@@ -27,9 +26,9 @@ def main():
     print 'Preprocessing data'
     print '------------------\n'
 
-    used_fraction = 0.005
+    used_fraction = 1
     train_fraction = 0.8
-    none_fraction = 0.1
+    none_fraction = 0.05
 
     print 'Fraction of data used:', used_fraction
     print 'Fraction of data for training:', train_fraction
@@ -47,7 +46,8 @@ def main():
     stem_dict = get_stem_dict(subsampled_tokens)
     word_dict = get_word_dict(subsampled_tokens)
     ngram_order = 2
-    ngram_dict = get_char_ngram_dict(subsampled_tokens, ngram_order)
+    char_ngram_dict = get_char_ngram_dict(subsampled_tokens, ngram_order)
+    ngram_dict = get_ngram_dict(all_train_tokens, ngram_order)
     trigger_dict = get_trigger_dict(subsampled_tokens)
 
     # feature_strings = ["word_class_template_feature",
@@ -63,7 +63,8 @@ def main():
                        'token_is_after_dash_feature',
                        'pos_class_feature',
                        'character_ngram_feature']
-    phi = partial(set_of_features, stem_dict, word_dict, class_dict, trigger_dict, ngram_order, ngram_dict, feature_strings)
+    phi = partial(set_of_features, stem_dict, word_dict, class_dict, trigger_dict, ngram_order, char_ngram_dict,
+                  ngram_dict, feature_strings)
 
     print 'Used features:', feature_strings
 
@@ -78,7 +79,7 @@ def main():
     print '-------------\n'
 
     alpha = 0.2
-    max_iterations = 1
+    max_iterations = 10
 
     print 'Alpha =', alpha
     print 'Max iterations =', max_iterations
@@ -129,31 +130,32 @@ def main():
     y_test = map(lambda t: t.event_candidate, all_test_tokens)
     y_pred = predictions
 
-    # Compute confusion matrix
-    # cm = sk.confusion_matrix(y_test, y_pred)
-    #
-    # print(cm)
+    # Compute sklearn confusion matrix
+    cm = sk.confusion_matrix(y_test, y_pred)
+    print(cm)
 
+    # Computer our confusion matrix
     cm2 = confusion_matrix(class_dict, y_test, y_pred)
-
-    print cm2
+    pprint(cm2)
 
     none_index = class_dict['None']
+    classes = class_dict.keys()
 
     for i in range(len(class_dict)):
-        print 'recall of', i, ':', label_recall(cm2, i)
-        print 'precision of', i, ':', label_precision(cm2, i)
-        print 'f1 of', i, ':', label_f1(cm2, i)
-        
+        print '\nCLASS: ', classes[i]
+        print 'Recall: ', label_recall(cm2, i)
+        print 'Precision: ', label_precision(cm2, i)
+        print 'F1: ', label_f1(cm2, i)
+
     print '\n'
-    print 'precision micro:', precision_micro(cm2, none_index)
-    print 'recall micro:', recall_micro(cm2, none_index)
-    print 'f1 micro:', f1_micro(cm2, none_index)
+    print 'Precision micro:', precision_micro(cm2, none_index)
+    print 'Recall micro:', recall_micro(cm2, none_index)
+    print 'F1 micro:', f1_micro(cm2, none_index)
     print '\n'
-    print 'precision macro:', precision_macro(cm2, none_index)
-    print 'recall macro:', recall_macro(cm2, none_index)
-    print 'f1 macro:', f1_macro(cm2, none_index)
-    
+    print 'Precision macro:', precision_macro(cm2, none_index)
+    print 'Recall macro:', recall_macro(cm2, none_index)
+    print 'F1 macro:', f1_macro(cm2, none_index)
+
 
     # Show confusion matrix in a separate window
     # import matplotlib.pyplot as plt
@@ -166,9 +168,9 @@ def main():
 
     ###
     analysis_end = time.time()
-    print 'Analysis time:', analysis_end - predict_end, 's'
-    ####################################################################################################################
-
+    print '\nAnalysis time:', analysis_end - predict_end, 's'
+    # ####################################################################################################################
+    #
     cp.dump(classifier, open('classifier_' + time.strftime("%Y%m%d-%H%M%S") + '.p', 'wb'))
     # classifier = cp.loads(open('classifier.p', 'rb').read())
 
