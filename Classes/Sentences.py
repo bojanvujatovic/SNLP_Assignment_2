@@ -110,6 +110,19 @@ class Sentences(object):
                     counter += 1
 
         return ret
+    
+    def get_class_args_dict(self):
+        ret = {}
+        counter = 0
+
+        for sentence in self.sentences:
+            for token in sentence.tokens:
+                for (_, class_arg) in token.event_candidate_args:
+                    if ret.get(class_arg, None) is None and class_arg is not None:
+                        ret[class_arg] = counter
+                        counter += 1
+
+        return ret
 
     def get_trigger_dict(self):
         ret = {}
@@ -208,16 +221,7 @@ class Sentence(object):
                     args = e.get("arguments", None)
                     for arg in args:
                         for arg_index in range(arg.get("begin", None), arg.get("end", None)):
-                            arg_word = None
-                            for token_t in sentence.get("tokens", None):
-                                index_t = token_t.get("index", None)
-                                word_t = token_t.get("word", None)
-                                if index_t == arg_index:
-                                    arg_word = word_t
-                                    arg_token = token_t
-                                    break
-
-                            event_candidate_args.append((arg_token, arg.get("gold", None)))
+                            event_candidate_args.append((arg_index, arg.get("gold", None)))
 
             self.tokens.append(Token(self, word, token.get("stem", None), index,
                                      token.get("pos", None), token.get("begin", None), token.get("end", None),
@@ -249,14 +253,7 @@ class Token(object):
         # What we want to learn
         self.event_candidate = event_candidate
         self.event_candidate_args = event_candidate_args
-        
-        s = []
-        for e in self.event_candidate_args:
-            if e[1] != 'None':
-                s.append(e)
-                
-        if len(s) > 1:
-            print event_candidate_args
+            
         # Derived features
         self.paragraph_text = sentence.paragraph_txt
         self.sentence_index = sentence_index

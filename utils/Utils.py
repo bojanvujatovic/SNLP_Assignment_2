@@ -6,6 +6,9 @@ def subsample_none(tokens, fraction, seed=time.clock()):
     random.seed(seed)
     return [t for t in tokens if t.event_candidate != 'None' or random.random() < fraction]
 
+def subsample_none_args(tokens, fraction, seed=time.clock()):
+    random.seed(seed)
+    return [t for t in tokens if len(t.event_candidate_args) > 0 or random.random() < fraction]
 
 def subsample_label(tokens, label, fraction, seed=time.clock()):
     random.seed(seed)
@@ -46,3 +49,41 @@ def get_ngram_dict(tokens, n):
 def get_trigger_dict(tokens):
     return dict(map(lambda p: (p[1], p[0]),
                 enumerate(set([trig for t in tokens if t.event_candidate != 'None' for trig in t.word.split('-')]))))
+
+def get_class_args_dict(tokens):
+    ret = {}
+    counter = 0
+
+    for token in tokens:
+        for (_, class_arg) in token.event_candidate_args:
+            if ret.get(class_arg, None) is None and class_arg is not None:
+                ret[class_arg] = counter
+                counter += 1
+
+    return ret
+
+def get_word_dict_args(tokens):
+    ret = {}
+    counter = 0
+
+    for token in tokens:
+        for t in token.tokens_in_sentence:
+            if ret.get(t.word, None) is None and t.word is not None:
+                ret[t.word] = counter
+                counter += 1
+
+    ret['<<UNK>>'] = len(ret)
+    return ret
+
+def get_stem_dict_args(tokens):
+    ret = {}
+    counter = 0
+
+    for token in tokens:
+        for t in token.tokens_in_sentence:
+            if ret.get(t.stem, None) is None and t.stem is not None:
+                ret[t.stem] = counter
+                counter += 1
+
+    ret['<<UNK>>'] = len(ret)
+    return ret
