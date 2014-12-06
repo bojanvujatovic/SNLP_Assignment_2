@@ -211,7 +211,7 @@ class Sentence(object):
                     event_candidate = e.get("gold", None)
                     break
             if event_candidate == None:
-                event_candidate = "None"
+                event_candidate = u'None'
 
             event_candidate_args = []
             args = []
