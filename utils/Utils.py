@@ -105,7 +105,7 @@ def get_stem_dict_args(tokens):
 
 
 def get_arg_word_dict(tokens):
-    arg_words = set([t[0]['word'] for token in tokens if token.event_candidate != 'None'
+    arg_words = set([token.tokens_in_sentence[t[0]].word for token in tokens if token.event_candidate != 'None'
                      for t in token.event_candidate_args if t[1] != 'None'])
     arg_words.add('<<UNK>>')
     return dict(map(lambda p: (p[1], p[0]), enumerate(arg_words)))

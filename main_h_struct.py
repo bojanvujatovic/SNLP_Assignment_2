@@ -2,10 +2,10 @@ from Classes.Sentences import Paragraphs, Sentences
 from Features.example_features import *
 from functools import partial
 from classifier.ErrorAnalysis import *
-from classifier.loglinear.Loglinear import LoglinearModel
+from classifier.loglinear.StructuredLoglinear import StructuredLoglinearModel
 from utils.Utils import *
 import cloud.serialization.cloudpickle as cp
-from pprint import pprint
+import numpy as np
 
 
 def main():
@@ -27,7 +27,7 @@ def main():
     print 'Preprocessing data'
     print '------------------\n'
 
-    used_fraction = 0.005
+    used_fraction = 1
     train_fraction = 0.8
     none_fraction = 0.05
 
@@ -43,9 +43,8 @@ def main():
 
     print 'Number of training tokens:', len(subsampled_tokens)
 
-    gold = lambda t: map(lambda a: a[1], t.event_candidate_args)
-
     class_dict = get_class_dict(subsampled_tokens)
+    arg_dict = {'None': 0, 'Theme': 1, 'Cause': 2}
     stem_dict = get_stem_dict(subsampled_tokens)
     word_dict = get_word_dict(subsampled_tokens)
     ngram_order = 2
@@ -63,7 +62,7 @@ def main():
                        'token_is_after_dash_feature',
                        'pos_class_feature',
                        'character_ngram_feature']
-    phi = partial(set_of_features, stem_dict, word_dict, class_dict, trigger_dict, ngram_order, char_ngram_dict,
+    phi = partial(set_of_features_structured, stem_dict, word_dict, arg_dict, arg_word_dict, ngram_order, char_ngram_dict,
                   ngram_dict, feature_strings)
 
     print 'Used features:', feature_strings
@@ -81,10 +80,17 @@ def main():
     alpha = 0.2
     max_iterations = 10
 
+    # gold = lambda t: map(lambda a: a[1], t.event_candidate_args)
+    def gold(trigger):
+        args = [u'None'] * len(trigger.tokens_in_sentence)
+        for (i, arg) in trigger.event_candidate_args:
+            args[i] = arg
+        return args
+
     print 'Alpha =', alpha
     print 'Max iterations =', max_iterations
 
-    classifier = LoglinearModel(lambda t: t.event_candidate, phi, class_dict.keys(), alpha, max_iterations)\
+    classifier = StructuredLoglinearModel(gold, phi, arg_dict.keys(), alpha, max_iterations)\
         .train(subsampled_tokens)
 
     ###
@@ -98,7 +104,7 @@ def main():
     print '-------\n'
 
     all_test_tokens = test_sentences.tokens()
-    subsampled_test_tokens = all_test_tokens
+    subsampled_test_tokens = subsample_none(all_test_tokens, 0)
 
     print 'Number of test tokens:', len(subsampled_test_tokens)
 
@@ -114,49 +120,71 @@ def main():
     print 'Analysing results'
     print '-----------------\n'
 
-    true_labels = []
-    for token in all_test_tokens:
-        true_labels.append(token.event_candidate)
 
-    test_keys = class_dict.keys()
-    # test_keys.pop(0)
-    for label in test_keys:
-        print 'Analyzing label: ', label
-        precision_recall_f1(true_labels, predictions, label)
+    n_args = len(arg_dict)
+    confusion = mat(zeros((n_args, n_args)))
 
-    # from sklearn.metrics import confusion_matrix
-    import sklearn.metrics as sk
+    hits = 0
+    misses = 0
 
-    y_test = map(lambda t: t.event_candidate, all_test_tokens)
-    y_pred = predictions
+    for i in range(0, len(predictions)):
+        truth = gold(subsampled_test_tokens[i])
+        if truth == predictions[i]:
+            hits += 1
+        else:
+            misses += 1
+        for j in range(0, len(predictions[i])):
+            confusion[arg_dict[predictions[i][j]], arg_dict[truth[j]]] += 1
 
-    # Compute sklearn confusion matrix
-    cm = sk.confusion_matrix(y_test, y_pred)
-    print(cm)
+    np.set_printoptions(suppress=True)
+    print confusion
 
-    # Computer our confusion matrix
-    cm2 = confusion_matrix(class_dict, y_test, y_pred)
-    pprint(cm2)
+    print hits
+    print misses
 
-    print cm2
-
-    none_index = class_dict['None']
-    classes = class_dict.keys()
-
-    for i in range(len(class_dict)):
-        print '\nCLASS: ', classes[i]
-        print 'Recall: ', label_recall(cm2, i)
-        print 'Precision: ', label_precision(cm2, i)
-        print 'F1: ', label_f1(cm2, i)
-
-    print '\n'
-    print 'Precision micro:', precision_micro(cm2, none_index)
-    print 'Recall micro:', recall_micro(cm2, none_index)
-    print 'F1 micro:', f1_micro(cm2, none_index)
-    print '\n'
-    print 'Precision macro:', precision_macro(cm2, none_index)
-    print 'Recall macro:', recall_macro(cm2, none_index)
-    print 'F1 macro:', f1_macro(cm2, none_index)
+    # true_labels = []
+    # for token in all_test_tokens:
+    #     true_labels.append(token.event_candidate)
+    #
+    # test_keys = class_dict.keys()
+    # # test_keys.pop(0)
+    # for label in test_keys:
+    #     print 'Analyzing label: ', label
+    #     precision_recall_f1(true_labels, predictions, label)
+    #
+    # # from sklearn.metrics import confusion_matrix
+    # import sklearn.metrics as sk
+    #
+    # y_test = map(lambda t: t.event_candidate, all_test_tokens)
+    # y_pred = predictions
+    #
+    # # Compute sklearn confusion matrix
+    # cm = sk.confusion_matrix(y_test, y_pred)
+    # print(cm)
+    #
+    # # Computer our confusion matrix
+    # cm2 = confusion_matrix(class_dict, y_test, y_pred)
+    # pprint(cm2)
+    #
+    # print cm2
+    #
+    # none_index = class_dict['None']
+    # classes = class_dict.keys()
+    #
+    # for i in range(len(class_dict)):
+    #     print '\nCLASS: ', classes[i]
+    #     print 'Recall: ', label_recall(cm2, i)
+    #     print 'Precision: ', label_precision(cm2, i)
+    #     print 'F1: ', label_f1(cm2, i)
+    #
+    # print '\n'
+    # print 'Precision micro:', precision_micro(cm2, none_index)
+    # print 'Recall micro:', recall_micro(cm2, none_index)
+    # print 'F1 micro:', f1_micro(cm2, none_index)
+    # print '\n'
+    # print 'Precision macro:', precision_macro(cm2, none_index)
+    # print 'Recall macro:', recall_macro(cm2, none_index)
+    # print 'F1 macro:', f1_macro(cm2, none_index)
 
 
     # Show confusion matrix in a separate window
