@@ -28,8 +28,8 @@ def main():
     # READ DATA
     
     used_fraction = 1
-    train_fraction = 0.2
-    none_fraction = 0.3
+    train_fraction = 0.3
+    none_args_fraction = 0.01
     
     all_train_sentences = Paragraphs("Dataset/Train/").all_sentences()
     
@@ -37,11 +37,13 @@ def main():
     (train_sentences, test_sentences) = used_sentences.split_randomly(train_fraction)
 
     all_train_tokens = train_sentences.tokens()
-    subsampled_tokens = subsample_none(all_train_tokens, none_fraction)
+    all_test_tokens = test_sentences.tokens()
+    subsampled_tokens = subsample_none_args(all_train_tokens, none_args_fraction)
+    class_dict_events_args = get_class_args_dict(subsampled_tokens)
     
     class_dict_events = get_class_dict(subsampled_tokens)
-    stem_dict = get_stem_dict(subsampled_tokens)
-    word_dict = get_word_dict(subsampled_tokens)
+    stem_dict = get_stem_dict_args(subsampled_tokens)
+    word_dict = get_word_dict_args(subsampled_tokens)
     trigger_dict = get_trigger_dict(subsampled_tokens)
     
     necessary_feature_string_events = ["class_feature"]
@@ -152,6 +154,32 @@ def main():
                                        "pos_class_feature",
                                        "token_is_after_dash_feature"]
     
+    
+    
+    nb_args = NaiveBayesArgs(stem_dict, word_dict, class_dict_events_args, trigger_dict)
+    
+    trained_nb_args = nb_args.train(subsampled_tokens, ['class_feature', 'word_class_feature', 'capital_letter_class_feature'])
+    
+    y_test = []
+    for token_parent in all_test_tokens:
+        for token_child in token_parent.tokens_in_sentence:
+            class_arg = "None"
+            for (t_index, c) in token_parent.event_candidate_args:
+                if t_index == token_parent.index:
+                    class_arg = c
+                    break
+            y_test.append(class_arg)
+    y_pred = trained_nb_args.predict_all(all_test_tokens)
+    
+    cm = confusion_matrix(class_dict_events_args, y_test, y_pred)
+    
+    print cm
+    
+    #for i in range(len(y_test)):
+    #    print y_test[i], y_pred[i]
+    
+    #print y_test
+    #print y_pred
 
 def determine_optimal_features(stem_dict, word_dict, class_dict, trigger_dict, train_tokens, validation_tokens, neccessary_feature_strings, all_feature_strings):
     current_optimal_feature_strings = neccessary_feature_strings
@@ -204,5 +232,6 @@ def determine_optimal_features(stem_dict, word_dict, class_dict, trigger_dict, t
         print ''
     
     return (current_optimal_feature_strings, cm_max)
+
 if __name__ == "__main__":
     main()
