@@ -17,7 +17,7 @@ def main_m():
     print 'Reading data'
     print '------------\n'
 
-    all_train_sentences = Paragraphs("Dataset/Train_small/").all_sentences()
+    all_train_sentences = Paragraphs("Dataset/Train/").all_sentences()
 
     ###
     read_end = time.time()
@@ -53,19 +53,16 @@ def main_m():
     ngram_dict = get_ngram_dict(all_train_tokens, ngram_order)
     trigger_dict = get_trigger_dict(subsampled_tokens)
 
-    # feature_strings = ["word_class_template_feature",
-    #                    "capital_letter_feature",
-    #                    "number_in_token_feature",
-    #                    "character_ngram_feature"]
+
     feature_strings = ['word_template_feature',
-                       'word_class_template_feature',
-                       'capital_letter_feature',
-                       'token_in_trigger_dict_feature',
-                       'number_in_token_feature',
-                       'token_in_protein_feature',
-                       'token_is_after_dash_feature',
-                       'pos_class_feature',
-                       'character_ngram_feature']
+                       'word_class_template_feature']
+                       # 'capital_letter_feature',
+                       # 'token_in_trigger_dict_feature',
+                       # 'number_in_token_feature',
+                       # 'token_in_protein_feature',
+                       # 'token_is_after_dash_feature',
+                       # 'pos_class_feature',
+                       # 'character_ngram_feature']
     phi = partial(set_of_features, stem_dict, word_dict, class_dict, trigger_dict, ngram_order, char_ngram_dict,
                   ngram_dict, feature_strings)
 
@@ -173,7 +170,7 @@ def main_m():
     print '\nAnalysis time:', analysis_end - predict_end, 's'
     # ####################################################################################################################
     #
-    # cp.dump(classifier, open('classifier_' + time.strftime("%Y%m%d-%H%M%S") + '.p', 'wb'))
+    cp.dump(classifier, open('classifier_' + time.strftime("%Y%m%d-%H%M%S") + '.p', 'wb'))
     # classifier = cp.loads(open('classifier.p', 'rb').read())
 
 
