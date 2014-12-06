@@ -7,8 +7,10 @@ from scipy import array
 
 def word_template_feature(stem_dict, word_dict, class_dict, trigger_dict, n, char_ngram_combinations,
                           ngram_combinations, token, event_candidate):
-    try: i = [word_dict[token.word]]
-    except: i = [word_dict['<<UNK>>']]
+    try:
+        i = [word_dict[token.word]]
+    except:
+        i = [word_dict['<<UNK>>']]
 
     return i, len(word_dict)
 
@@ -118,8 +120,10 @@ def character_ngram_feature(stem_dict, word_dict, class_dict, trigger_dict, n, c
 
 def word_stem_feature(stem_dict, word_dict, class_dict, trigger_dict, n, char_ngram_combinations,
                       ngram_combinations, token, event_candidate):
-    try: i = [stem_dict[token.stem]]
-    except: i = [stem_dict['<<UNK>>']]
+    try:
+        i = [stem_dict[token.stem]]
+    except:
+        i = [stem_dict['<<UNK>>']]
 
     return i, len(stem_dict)
 
@@ -133,10 +137,10 @@ def ngram_features(stem_dict, word_dict, class_dict, trigger_dict, n, char_ngram
     if token.index == 0:
         ngram = ['<<START>>', str(token.word)]
     elif (token.tokens_in_sentence[-1].word == token.word) and \
-         (len(token.tokens_in_sentence)-1 == token.index):
+            (len(token.tokens_in_sentence) - 1 == token.index):
         ngram = [str(token.word), '<<END>>']
     else:
-        ngram = [str(token.tokens_in_sentence[token.index-1].word), str(token.word)]
+        ngram = [str(token.tokens_in_sentence[token.index - 1].word), str(token.word)]
 
     # check if the ngram is in the ngram list
     try:
@@ -154,6 +158,28 @@ def set_of_features(stem_dict, word_dict, class_dict, trigger_dict, n, char_ngra
     for feature_string in feature_strings:
         res = globals()[feature_string](stem_dict, word_dict, class_dict, trigger_dict, n,
                                         char_ngram_combinations, ngram_combinations, token, event_candidate)
+        matrix_indices += [x + matrix_length for x in res[0]]
+        matrix_length += res[1]
+
+    v_length = len(matrix_indices)
+    data = array([1] * v_length)
+    i = array(matrix_indices)
+    j = array([0] * v_length)
+    return csr_matrix((data, (i, j)), shape=(matrix_length, 1))
+
+
+def set_of_features_structured(stem_dict, word_dict, class_dict, trigger_dict, n, char_ngram_combinations,
+                               ngram_combinations, feature_strings, token, event_candidate):
+    matrix_indices = []
+    matrix_length = 0
+
+    res = word_stem_feature(stem_dict, None, None, None, None, None, None, token[0], None)
+    matrix_indices += [x + matrix_length for x in res[0]]
+    matrix_length += res[1]
+
+    for feature_string in feature_strings:
+        res = globals()[feature_string](stem_dict, word_dict, class_dict, trigger_dict, n,
+                                        char_ngram_combinations, ngram_combinations, token[1], event_candidate)
         matrix_indices += [x + matrix_length for x in res[0]]
         matrix_length += res[1]
 

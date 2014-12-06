@@ -255,8 +255,8 @@ class Token(object):
             if e[1] != 'None':
                 s.append(e)
                 
-        if len(s) > 1:
-            print event_candidate_args
+        # if len(s) > 1:
+        #     print event_candidate_args
         # Derived features
         self.paragraph_text = sentence.paragraph_txt
         self.sentence_index = sentence_index
