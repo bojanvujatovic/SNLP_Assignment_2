@@ -2,7 +2,7 @@ from Classes.Sentences import Paragraphs, Sentences
 from Features.example_features import *
 from functools import partial
 from classifier.ErrorAnalysis import *
-from classifier.loglinear.StructuredLoglinear import StructuredLoglinearModel
+from classifier.loglinear.StructuredLoglinear import SearchStructuredLoglinearModel, StructuredLoglinearModel
 from utils.Utils import *
 import cloud.serialization.cloudpickle as cp
 import numpy as np
@@ -16,7 +16,8 @@ def main():
     print '------------\n'
 
     all_train_sentences = Paragraphs("Dataset/Train/").all_sentences()
-
+    # all_test_sentences = Paragraphs("Dataset/Test/").all_sentences()
+    # (all_test_sentences, _) = all_test_sentences.split_randomly(0.001)
     ###
     read_end = time.time()
     print 'Reading time:', read_end - start, 's'
@@ -29,7 +30,7 @@ def main():
 
     used_fraction = 1
     train_fraction = 0.8
-    none_fraction = 0.05
+    none_fraction = 0.10
 
     print 'Fraction of data used:', used_fraction
     print 'Fraction of data for training:', train_fraction
@@ -37,9 +38,12 @@ def main():
 
     (used_sentences, _) = all_train_sentences.split_randomly(used_fraction)
     (train_sentences, test_sentences) = used_sentences.split_randomly(train_fraction)
+    # test_sentences = all_test_sentences
 
     all_train_tokens = train_sentences.tokens()
     subsampled_tokens = subsample_none(all_train_tokens, none_fraction)
+    # subsampled_tokens = subsample_label(subsampled_tokens, u'Gene_expression', 0.4)
+    # subsampled_tokens = subsample_label(subsampled_tokens, u'Binding', 0.6)
 
     print 'Number of training tokens:', len(subsampled_tokens)
 
@@ -53,16 +57,22 @@ def main():
     trigger_dict = get_trigger_dict(subsampled_tokens)
     arg_word_dict = get_arg_word_dict(subsampled_tokens)
 
-    feature_strings = ['word_template_feature',
+    classes = dict(map(lambda c: (c, 0), class_dict.keys()))
+    for token in subsampled_tokens:
+        classes[token.event_candidate] += 1
+
+    print classes
+
+    feature_strings = [#'word_template_feature',
                        'word_class_template_feature',
                        'capital_letter_feature',
-                       'token_in_trigger_dict_feature',
+                       # 'token_in_trigger_dict_feature',
                        'number_in_token_feature',
                        'token_in_protein_feature',
-                       'token_is_after_dash_feature',
-                       'pos_class_feature',
-                       'character_ngram_feature']
-    phi = partial(set_of_features_structured, stem_dict, word_dict, arg_dict, arg_word_dict, ngram_order, char_ngram_dict,
+                       # 'token_is_after_dash_feature',
+                       'pos_class_feature']
+                       # 'character_ngram_feature']
+    phi = partial(set_of_features_structured, stem_dict, word_dict, arg_dict, class_dict, arg_word_dict, ngram_order, char_ngram_dict,
                   ngram_dict, feature_strings)
 
     print 'Used features:', feature_strings
@@ -78,7 +88,8 @@ def main():
     print '-------------\n'
 
     alpha = 0.2
-    max_iterations = 10
+    max_iterations = 15
+    arg_none_subsampling = 0.05
 
     # gold = lambda t: map(lambda a: a[1], t.event_candidate_args)
     def gold(trigger):
@@ -90,8 +101,11 @@ def main():
     print 'Alpha =', alpha
     print 'Max iterations =', max_iterations
 
-    classifier = StructuredLoglinearModel(gold, phi, arg_dict.keys(), alpha, max_iterations)\
-        .train(subsampled_tokens)
+    # classifier = SearchStructuredLoglinearModel(gold, phi, arg_dict.keys(), alpha, max_iterations)\
+    #     .train(subsampled_tokens, average=True)
+
+    classifier = StructuredLoglinearModel(gold, phi, arg_dict.keys(), alpha, arg_none_subsampling, max_iterations)\
+        .train(subsampled_tokens, average=True)
 
     ###
     train_end = time.time()
@@ -109,7 +123,12 @@ def main():
     print 'Number of test tokens:', len(subsampled_test_tokens)
 
     predictions = classifier.predict_all(subsampled_test_tokens)
-
+    # print predictions
+    # f = open('test_structured_simple.txt', 'w')
+    # for p in predictions:
+    #     f.write(str(p))
+    #     f.write('\n')
+    # f.close()
     ###
     predict_end = time.time()
     print 'Predict time:', predict_end - train_end, 's'
@@ -138,6 +157,14 @@ def main():
 
     np.set_printoptions(suppress=True)
     print confusion
+
+    print 'precision micro:', precision_micro(confusion, 0)
+    print 'recall micro:', recall_micro(confusion, 0)
+    print 'f1 micro:', f1_micro(confusion, 0)
+
+    print 'precision macro:', precision_macro(confusion, 0)
+    print 'recall macro:', recall_macro(confusion, 0)
+    print 'f1 macro:', f1_macro(confusion, 0)
 
     print hits
     print misses

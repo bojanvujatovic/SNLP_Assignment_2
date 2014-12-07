@@ -168,7 +168,7 @@ def set_of_features(stem_dict, word_dict, class_dict, trigger_dict, n, char_ngra
     return csr_matrix((data, (i, j)), shape=(matrix_length, 1))
 
 
-def set_of_features_structured(stem_dict, word_dict, class_dict, trigger_dict, n, char_ngram_combinations,
+def set_of_features_structured(stem_dict, word_dict, arg_dict, class_dict, trigger_dict, n, char_ngram_combinations,
                                ngram_combinations, feature_strings, token, event_candidate):
     matrix_indices = []
     matrix_length = 0
@@ -178,7 +178,7 @@ def set_of_features_structured(stem_dict, word_dict, class_dict, trigger_dict, n
     matrix_length += res[1]
 
     for feature_string in feature_strings:
-        res = globals()[feature_string](stem_dict, word_dict, class_dict, trigger_dict, n,
+        res = globals()[feature_string](stem_dict, word_dict, arg_dict, trigger_dict, n,
                                         char_ngram_combinations, ngram_combinations, token[1], event_candidate)
         matrix_indices += [x + matrix_length for x in res[0]]
         matrix_length += res[1]
