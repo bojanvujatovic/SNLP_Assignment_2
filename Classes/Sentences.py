@@ -78,7 +78,7 @@ class Sentences(object):
         A = Sentences("", [])
         B = Sentences("", [])
 
-        random.seed(23234)
+        random.seed(1)
         for sentence in self.sentences:
             if random.random() < split_percentage:
                 A.sentences.append(sentence)

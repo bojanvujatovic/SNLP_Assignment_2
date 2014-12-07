@@ -9,7 +9,7 @@ from pprint import pprint
 
 
 
-def main_m():
+def main_m(alpha):
 
     start = time.time()
     ### READ ###########################################################################################################
@@ -55,14 +55,14 @@ def main_m():
 
 
     feature_strings = ['word_template_feature',
-                       'word_class_template_feature']
-                       # 'capital_letter_feature',
-                       # 'token_in_trigger_dict_feature',
-                       # 'number_in_token_feature',
-                       # 'token_in_protein_feature',
-                       # 'token_is_after_dash_feature',
-                       # 'pos_class_feature',
-                       # 'character_ngram_feature']
+                       'word_class_template_feature',
+                       'capital_letter_feature',
+                       'token_in_trigger_dict_feature',
+                       'number_in_token_feature',
+                       'token_in_protein_feature',
+                       'token_is_after_dash_feature',
+                       'pos_class_feature',
+                       'character_ngram_feature']
     phi = partial(set_of_features, stem_dict, word_dict, class_dict, trigger_dict, ngram_order, char_ngram_dict,
                   ngram_dict, feature_strings)
 
@@ -78,7 +78,7 @@ def main_m():
     print 'Training data'
     print '-------------\n'
 
-    alpha = 0.2
+    # alpha = 0.2
     max_iterations = 10
 
     print 'Alpha =', alpha
@@ -165,14 +165,25 @@ def main_m():
     # plt.xlabel('Predicted label')
     # plt.show()
 
+    print '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'
+
     ###
     analysis_end = time.time()
     print '\nAnalysis time:', analysis_end - predict_end, 's'
     # ####################################################################################################################
     #
-    cp.dump(classifier, open('classifier_' + time.strftime("%Y%m%d-%H%M%S") + '.p', 'wb'))
+    # cp.dump(classifier, open('classifier_' + time.strftime("%Y%m%d-%H%M%S") + '.p', 'wb'))
+
+    cp.dump(classifier, open('new1_d' + str(used_fraction) + '_ss' + str(none_fraction) +
+                             'a'+str(alpha) + '_i' + str(max_iterations), 'wb'))
+
     # classifier = cp.loads(open('classifier.p', 'rb').read())
 
 
 if __name__ == "__main__":
-    main_m()
+    alphas = [0.2, 0.22]
+    for alpha in alphas:
+        print '#######################'
+        print '####################### ALPHA: ', alpha
+        print '#######################'
+        main_m(alpha)
