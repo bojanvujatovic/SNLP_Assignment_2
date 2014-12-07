@@ -43,8 +43,6 @@ def main():
 
     print 'Number of training tokens:', len(subsampled_tokens)
 
-    gold = lambda t: map(lambda a: a[1], t.event_candidate_args)
-
     class_dict = get_class_dict(subsampled_tokens)
     stem_dict = get_stem_dict(subsampled_tokens)
     word_dict = get_word_dict(subsampled_tokens)
@@ -119,20 +117,13 @@ def main():
         true_labels.append(token.event_candidate)
 
     test_keys = class_dict.keys()
-    # test_keys.pop(0)
     for label in test_keys:
         print 'Analyzing label: ', label
         precision_recall_f1(true_labels, predictions, label)
 
-    # from sklearn.metrics import confusion_matrix
-    import sklearn.metrics as sk
 
     y_test = map(lambda t: t.event_candidate, all_test_tokens)
     y_pred = predictions
-
-    # Compute sklearn confusion matrix
-    cm = sk.confusion_matrix(y_test, y_pred)
-    print(cm)
 
     # Computer our confusion matrix
     cm2 = confusion_matrix(class_dict, y_test, y_pred)
@@ -158,23 +149,12 @@ def main():
     print 'Recall macro:', recall_macro(cm2, none_index)
     print 'F1 macro:', f1_macro(cm2, none_index)
 
-
-    # Show confusion matrix in a separate window
-    # import matplotlib.pyplot as plt
-    # plt.matshow(cm)
-    # plt.title('Confusion matrix')
-    # plt.colorbar()
-    # plt.ylabel('True label')
-    # plt.xlabel('Predicted label')
-    # plt.show()
-
     ###
     analysis_end = time.time()
     print '\nAnalysis time:', analysis_end - predict_end, 's'
     # ####################################################################################################################
     #
     cp.dump(classifier, open('classifier_' + time.strftime("%Y%m%d-%H%M%S") + '.p', 'wb'))
-    # classifier = cp.loads(open('classifier.p', 'rb').read())
 
 
 if __name__ == "__main__":
