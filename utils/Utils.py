@@ -2,11 +2,11 @@ import random
 import time
 
 
-def subsample_none(tokens, fraction, seed=time.clock()):
+def subsample_none(tokens, fraction, seed=1):
     random.seed(seed)
     return [t for t in tokens if t.event_candidate != 'None' or random.random() < fraction]
 
-def subsample_none_args(tokens, fraction, seed=time.clock()):
+def subsample_none_args(tokens, fraction, seed=1):
     random.seed(seed)
     return [t for t in tokens if len(t.event_candidate_args) > 0 or random.random() < fraction]
 
@@ -58,7 +58,7 @@ def get_ngram_dict(tokens, n):
             current_ngram = current_ngram[1:] + [token.word]
         ngrams.add(str(current_ngram))
     ngrams.add('<<UNK>>')
-    return dict(map(lambda p: (p[0], p[1]), enumerate(ngrams)))
+    return dict(map(lambda p: (p[1], p[0]), enumerate(ngrams)))
 
 
 def get_trigger_dict(tokens):
