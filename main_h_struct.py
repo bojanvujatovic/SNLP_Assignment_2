@@ -16,8 +16,6 @@ def main():
     print '------------\n'
 
     all_train_sentences = Paragraphs("Dataset/Train/").all_sentences()
-    # all_test_sentences = Paragraphs("Dataset/Test/").all_sentences()
-    # (all_test_sentences, _) = all_test_sentences.split_randomly(0.001)
     ###
     read_end = time.time()
     print 'Reading time:', read_end - start, 's'
@@ -38,12 +36,9 @@ def main():
 
     (used_sentences, _) = all_train_sentences.split_randomly(used_fraction)
     (train_sentences, test_sentences) = used_sentences.split_randomly(train_fraction)
-    # test_sentences = all_test_sentences
 
     all_train_tokens = train_sentences.tokens()
     subsampled_tokens = subsample_none(all_train_tokens, none_fraction)
-    # subsampled_tokens = subsample_label(subsampled_tokens, u'Gene_expression', 0.4)
-    # subsampled_tokens = subsample_label(subsampled_tokens, u'Binding', 0.6)
 
     print 'Number of training tokens:', len(subsampled_tokens)
 
@@ -91,7 +86,6 @@ def main():
     max_iterations = 15
     arg_none_subsampling = 0.05
 
-    # gold = lambda t: map(lambda a: a[1], t.event_candidate_args)
     def gold(trigger):
         args = [u'None'] * len(trigger.tokens_in_sentence)
         for (i, arg) in trigger.event_candidate_args:
@@ -123,13 +117,7 @@ def main():
     print 'Number of test tokens:', len(subsampled_test_tokens)
 
     predictions = classifier.predict_all(subsampled_test_tokens)
-    # print predictions
-    # f = open('test_structured_simple.txt', 'w')
-    # for p in predictions:
-    #     f.write(str(p))
-    #     f.write('\n')
-    # f.close()
-    ###
+
     predict_end = time.time()
     print 'Predict time:', predict_end - train_end, 's'
     ####################################################################################################################
@@ -166,70 +154,12 @@ def main():
     print 'recall macro:', recall_macro(confusion, 0)
     print 'f1 macro:', f1_macro(confusion, 0)
 
-    print hits
-    print misses
-
-    # true_labels = []
-    # for token in all_test_tokens:
-    #     true_labels.append(token.event_candidate)
-    #
-    # test_keys = class_dict.keys()
-    # # test_keys.pop(0)
-    # for label in test_keys:
-    #     print 'Analyzing label: ', label
-    #     precision_recall_f1(true_labels, predictions, label)
-    #
-    # # from sklearn.metrics import confusion_matrix
-    # import sklearn.metrics as sk
-    #
-    # y_test = map(lambda t: t.event_candidate, all_test_tokens)
-    # y_pred = predictions
-    #
-    # # Compute sklearn confusion matrix
-    # cm = sk.confusion_matrix(y_test, y_pred)
-    # print(cm)
-    #
-    # # Computer our confusion matrix
-    # cm2 = confusion_matrix(class_dict, y_test, y_pred)
-    # pprint(cm2)
-    #
-    # print cm2
-    #
-    # none_index = class_dict['None']
-    # classes = class_dict.keys()
-    #
-    # for i in range(len(class_dict)):
-    #     print '\nCLASS: ', classes[i]
-    #     print 'Recall: ', label_recall(cm2, i)
-    #     print 'Precision: ', label_precision(cm2, i)
-    #     print 'F1: ', label_f1(cm2, i)
-    #
-    # print '\n'
-    # print 'Precision micro:', precision_micro(cm2, none_index)
-    # print 'Recall micro:', recall_micro(cm2, none_index)
-    # print 'F1 micro:', f1_micro(cm2, none_index)
-    # print '\n'
-    # print 'Precision macro:', precision_macro(cm2, none_index)
-    # print 'Recall macro:', recall_macro(cm2, none_index)
-    # print 'F1 macro:', f1_macro(cm2, none_index)
-
-
-    # Show confusion matrix in a separate window
-    # import matplotlib.pyplot as plt
-    # plt.matshow(cm)
-    # plt.title('Confusion matrix')
-    # plt.colorbar()
-    # plt.ylabel('True label')
-    # plt.xlabel('Predicted label')
-    # plt.show()
-
     ###
     analysis_end = time.time()
     print '\nAnalysis time:', analysis_end - predict_end, 's'
     # ####################################################################################################################
     #
     cp.dump(classifier, open('classifier_' + time.strftime("%Y%m%d-%H%M%S") + '.p', 'wb'))
-    # classifier = cp.loads(open('classifier.p', 'rb').read())
 
 
 if __name__ == "__main__":
